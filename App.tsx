@@ -69,12 +69,18 @@ const MOCK_ITEMS: CollectedItem[] = [
 
 // Default Covers
 const DEFAULT_COVERS: Record<string, string> = {
-  [ItemCategory.PACKAGING]: 'https://images.unsplash.com/photo-1595079676614-889844277d33?auto=format&fit=crop&q=80&w=400',
-  [ItemCategory.CONTAINER]: 'https://images.unsplash.com/photo-1610847035619-38c64273df1a?auto=format&fit=crop&q=80&w=400',
-  [ItemCategory.PAPER]: 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&q=80&w=400',
-  [ItemCategory.ELECTRONIC]: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400',
-  [ItemCategory.TEXTILE]: 'https://images.unsplash.com/photo-1520006403909-838d6b92c22e?auto=format&fit=crop&q=80&w=400',
-  [ItemCategory.OTHER]: 'https://images.unsplash.com/photo-1552168324-d612d77725e3?auto=format&fit=crop&q=80&w=400',
+  // 牛皮纸+麻绳礼物包装，暖色调手工感
+  [ItemCategory.PACKAGING]: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&q=80&w=400',
+  // 陶瓷器皿，大地色系温暖质感
+  [ItemCategory.CONTAINER]: 'https://images.unsplash.com/photo-1604079628040-94301bb21b91?auto=format&fit=crop&q=80&w=400',
+  // 复古信件与明信片，怀旧浪漫
+  [ItemCategory.PAPER]: 'https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?auto=format&fit=crop&q=80&w=400',
+  // 复古胶片相机，暖色温文艺感
+  [ItemCategory.ELECTRONIC]: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&q=80&w=400',
+  // 彩色毛线团，温暖舒适手工感
+  [ItemCategory.TEXTILE]: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&q=80&w=400',
+  // 画笔与美术用品，创意生活感
+  [ItemCategory.OTHER]: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=400',
 };
 
 const INITIAL_HALLS: ExhibitionHall[] = Object.values(ItemCategory).map(cat => ({
