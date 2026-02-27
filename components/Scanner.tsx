@@ -240,7 +240,8 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
 
       <button 
         onClick={onCancel}
-        className="absolute top-4 right-4 text-neutral-500 hover:text-white"
+        aria-label="关闭扫描仪"
+        className="absolute top-4 right-4 text-neutral-400 hover:text-white"
       >
         <X size={24} />
       </button>
@@ -271,7 +272,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
             </div>
             <h3 className="text-xl font-display text-remuse-accent animate-pulse text-center">{statusText}</h3>
             {isGeneratingSticker && (
-                <p className="text-xs text-neutral-500 mt-2 font-mono">Drawing Vector Lines...</p>
+                <p className="text-xs text-neutral-400 mt-2 font-mono">Drawing Vector Lines...</p>
             )}
           </div>
         )}
@@ -296,7 +297,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
               </div>
               <div>
                 <h3 className="text-lg font-bold font-display text-white">{errorInfo.title}</h3>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase">
+                <span className="text-[10px] font-mono text-neutral-400 uppercase">
                   ERR_{errorInfo.category}
                 </span>
               </div>
@@ -317,7 +318,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
             {previewUrl && (
               <div className="mb-5 flex items-center gap-3">
                 <img src={previewUrl} alt="Preview" className="w-16 h-16 object-cover rounded border border-neutral-700" />
-                <span className="text-xs text-neutral-500 font-mono">当前图片</span>
+                <span className="text-xs text-neutral-400 font-mono">当前图片</span>
               </div>
             )}
 
@@ -364,7 +365,11 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
             </div>
             <div 
               onClick={triggerInput}
-              className="group cursor-pointer border-2 border-dashed border-neutral-700 hover:border-remuse-accent transition-colors bg-remuse-panel/50 p-12 flex flex-col items-center justify-center min-h-[300px] clip-corner"
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerInput(); } }}
+              role="button"
+              tabIndex={0}
+              aria-label="拍摄或上传图片"
+              className="group cursor-pointer border-2 border-dashed border-neutral-700 hover:border-remuse-accent transition-colors bg-remuse-panel/50 p-12 flex flex-col items-center justify-center min-h-[300px] clip-corner focus:outline-none focus:ring-2 focus:ring-remuse-accent"
             >
               <input 
                 type="file" 
@@ -377,7 +382,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                 <Camera size={32} />
               </div>
               <span className="font-display text-lg text-neutral-300">拍摄 / 上传</span>
-              <span className="text-xs text-neutral-500 mt-2 font-mono text-center">
+              <span className="text-xs text-neutral-400 mt-2 font-mono text-center">
                 支持 JPG, PNG <br/> AI 自动开始分析
               </span>
             </div>

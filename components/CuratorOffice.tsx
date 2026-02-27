@@ -77,7 +77,7 @@ const GardenVisualization: React.FC<{ remusedCount: number }> = ({ remusedCount 
         
         <div className="relative w-full h-full p-8 grid grid-cols-5 gap-4 content-center">
             {trees.length === 0 && (
-                <div className="col-span-5 text-center text-neutral-600 font-mono text-xs">
+                <div className="col-span-5 text-center text-neutral-400 font-mono text-xs">
                     森林尚未生长...<br/>完成改造以种植树木
                 </div>
             )}
@@ -286,7 +286,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                        <div key={tool.id} className="aspect-square bg-[#0a0a0a] border border-neutral-800 rounded shadow-inner flex flex-col items-center justify-center group relative hover:border-remuse-accent/50 transition-colors">
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleDeleteTool(tool.id); }}
-                            className="absolute top-1 right-1 p-1 text-neutral-700 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-1 right-1 p-1 text-neutral-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                              <Trash2 size={12} />
                           </button>
@@ -297,7 +297,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                           <span className="mt-4 text-xs font-mono text-neutral-400 group-hover:text-white">{tool.name}</span>
                           
                           {/* Slot Number Label */}
-                          <span className="absolute top-2 left-2 text-[8px] text-neutral-700 font-mono">SLOT-{String(idx + 1).padStart(2,'0')}</span>
+                          <span className="absolute top-2 left-2 text-[8px] text-neutral-500 font-mono">SLOT-{String(idx + 1).padStart(2,'0')}</span>
                        </div>
                      ))}
                      
@@ -357,7 +357,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                       className="w-full bg-neutral-900 border border-neutral-700 p-3 text-white focus:border-remuse-accent outline-none font-mono text-sm"
                       autoFocus
                     />
-                    <p className="text-[10px] text-neutral-600 mt-1">* 系统将根据名称自动匹配图标</p>
+                    <p className="text-[10px] text-neutral-400 mt-1">* 系统将根据名称自动匹配图标</p>
                   </div>
 
                   <div>
@@ -419,8 +419,8 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
               {/* Left: Collection Jar */}
               <div className="bg-remuse-panel border border-remuse-border p-6 rounded-sm relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-3 flex gap-2">
-                       <Hexagon size={16} className="text-neutral-700" />
-                       <Hexagon size={16} className="text-neutral-700" />
+                       <Hexagon size={16} className="text-neutral-500" />
+                       <Hexagon size={16} className="text-neutral-500" />
                   </div>
                   <h3 className="text-lg font-display text-neutral-300 mb-6 flex items-center gap-2">
                       <Star size={16} className="text-remuse-secondary"/> 馆藏星屑
@@ -434,8 +434,8 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
               {/* Right: Regeneration Forest */}
               <div className="bg-remuse-panel border border-remuse-border p-6 rounded-sm relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-3 flex gap-2">
-                       <Hexagon size={16} className="text-neutral-700" />
-                       <Hexagon size={16} className="text-neutral-700" />
+                       <Hexagon size={16} className="text-neutral-500" />
+                       <Hexagon size={16} className="text-neutral-500" />
                   </div>
                   <h3 className="text-lg font-display text-neutral-300 mb-6 flex items-center gap-2">
                       <Sprout size={16} className="text-remuse-accent"/> 再生森林

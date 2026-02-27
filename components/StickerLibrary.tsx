@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sticker, ItemCategory } from '../types';
 import { Sticker as StickerIcon, Download, Trash2, Box, Layers, Move, CheckCircle2, X, Grid, Shuffle, Save, BookImage, Scissors, Printer } from 'lucide-react';
+import logger from '../services/logger';
 
 interface StickerLibraryProps {
     stickers: Sticker[];
@@ -50,8 +51,13 @@ const StickerCard: React.FC<{
     return (
         <div 
             onClick={selectable ? onToggleSelect : undefined}
+            onKeyDown={selectable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleSelect?.(); } } : undefined}
+            role={selectable ? 'checkbox' : undefined}
+            aria-checked={selectable ? selected : undefined}
+            aria-label={selectable ? `选择贴纸: ${sticker.dramaText?.slice(0, 20)}` : undefined}
+            tabIndex={selectable ? 0 : undefined}
             className={`relative group bg-neutral-900 border rounded-lg p-4 flex flex-col items-center transition-all duration-200
-                ${selectable ? 'cursor-pointer' : ''}
+                ${selectable ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-remuse-accent' : ''}
                 ${selected 
                     ? 'border-remuse-accent ring-1 ring-remuse-accent bg-neutral-800' 
                     : 'border-neutral-800 hover:border-neutral-600'}
@@ -290,7 +296,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                  
                  ctx.restore();
              } catch (err) {
-                 console.error(err);
+                 logger.error('Collage sticker draw failed:', err);
              }
         }
         
@@ -403,7 +409,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                 ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
                 ctx.restore();
             } catch (e) {
-                console.error(e);
+                logger.error('XHS sticker draw failed:', e);
             }
         }
 
@@ -529,7 +535,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                     ctx.fillText(txt, cx + cellW / 2, cy + cellH - stickerPad - 10);
                 }
             } catch (e) {
-                console.error(e);
+                logger.error('Print sticker draw failed:', e);
             }
         }
 
@@ -843,7 +849,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                                 <p>1. 点击「导出打印图」保存高清 PNG</p>
                                 <p>2. 使用 A4 贴纸纸 / 不干胶纸打印</p>
                                 <p>3. 沿虚线裁切，贴到手账本上 ✂️</p>
-                                <p className="pt-2 text-neutral-500 border-t border-neutral-800 mt-2">🖨️ 导出尺寸：2480×3508px（A4 300DPI）</p>
+                <p className="pt-2 text-neutral-400 border-t border-neutral-800 mt-2">🖨️ 导出尺寸：2480×3508px（A4 300DPI）</p>
                                 <p>📦 已选择 {selectedStickers.length} 张贴纸（最多 9 张）</p>
                             </div>
 
@@ -1083,9 +1089,9 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
             {/* Grid */}
             {filteredStickers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-neutral-800 rounded-lg">
-                    <StickerIcon size={48} className="text-neutral-700 mb-4" />
-                    <p className="text-neutral-500 font-display">暂无贴纸</p>
-                    <p className="text-xs text-neutral-600 mt-2">使用扫描仪生成你的第一个贴纸</p>
+                    <StickerIcon size={48} className="text-neutral-500 mb-4" />
+                    <p className="text-neutral-400 font-display">暂无贴纸</p>
+                    <p className="text-xs text-neutral-400 mt-2">使用扫描仪生成你的第一个贴纸</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

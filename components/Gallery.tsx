@@ -86,7 +86,11 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
               <div 
                 key={item.id}
                 onClick={() => onSelectItem(item)}
-                className="group relative bg-remuse-panel border border-remuse-border hover:border-remuse-accent transition-all cursor-pointer overflow-hidden flex flex-col"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectItem(item); } }}
+                role="button"
+                tabIndex={0}
+                aria-label={`查看藏品: ${item.name}`}
+                className="group relative bg-remuse-panel border border-remuse-border hover:border-remuse-accent transition-all cursor-pointer overflow-hidden flex flex-col focus:outline-none focus:ring-2 focus:ring-remuse-accent"
               >
                 <div className="relative aspect-square overflow-hidden bg-black/50">
                   <img 
@@ -112,10 +116,10 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
               </div>
             ))}
             {filteredItems.length === 0 && (
-                <div className="col-span-full flex flex-col items-center justify-center py-20 border border-dashed border-neutral-800 text-neutral-600 rounded">
+                <div className="col-span-full flex flex-col items-center justify-center py-20 border border-dashed border-neutral-800 text-neutral-500 rounded">
                     <Box size={48} strokeWidth={1} />
                     <p className="mt-4 font-mono">展厅筹备中...</p>
-                    <p className="text-xs mt-2 text-neutral-700">请在扫描或编辑时选择此分类</p>
+                    <p className="text-xs mt-2 text-neutral-400">请在扫描或编辑时选择此分类</p>
                 </div>
             )}
          </div>
@@ -131,7 +135,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
             <h1 className="text-xl md:text-2xl font-display text-white tracking-wide mb-2">
                 <span className="text-neutral-500">::</span> 馆长，日安 <span className="text-neutral-500">::</span>
             </h1>
-            <p className="text-[10px] text-neutral-600 uppercase tracking-widest">
+            <p className="text-[10px] text-neutral-400 uppercase tracking-widest">
                 Select Exhibition Hall
             </p>
         </div>
@@ -146,7 +150,11 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
                     <div 
                         key={hall.id}
                         onClick={() => handleHallClick(hall.id)}
-                        className={`flex flex-col items-center group cursor-pointer ${isAnimating ? 'z-50' : 'z-10'}`}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleHallClick(hall.id); } }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`进入${hall.name}展厅，已收录 ${count} 件藏品`}
+                        className={`flex flex-col items-center group cursor-pointer focus:outline-none focus:ring-2 focus:ring-remuse-accent rounded-lg ${isAnimating ? 'z-50' : 'z-10'}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                     >
                         {/* House Shape Card Container */}
@@ -170,7 +178,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
                                     <h3 className="text-black font-bold font-display text-sm md:text-base leading-tight truncate w-full text-center">
                                         {hall.name}
                                     </h3>
-                                    <span className="text-[10px] text-neutral-500 font-mono mt-0.5">
+                                    <span className="text-[10px] text-neutral-400 font-mono mt-0.5">
                                         No.{count.toString().padStart(3, '0')}
                                     </span>
                                 </div>
@@ -183,14 +191,18 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
             {/* Add New Hall Button */}
             <div 
               onClick={() => setShowAddModal(true)}
-              className="flex flex-col items-center group cursor-pointer z-10"
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAddModal(true); } }}
+              role="button"
+              tabIndex={0}
+              aria-label="创建新展馆"
+              className="flex flex-col items-center group cursor-pointer z-10 focus:outline-none focus:ring-2 focus:ring-remuse-accent rounded-lg"
             >
                <div className="relative w-full aspect-[4/5] transition-all duration-300 hover:-translate-y-2">
                  <div className="w-full h-full border-2 border-dashed border-neutral-700 hover:border-remuse-accent bg-transparent clip-house flex flex-col items-center justify-center gap-4 transition-colors">
                     <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center group-hover:bg-remuse-accent group-hover:text-black transition-colors">
                       <Plus size={24} />
                     </div>
-                    <span className="font-display text-xs text-neutral-500 group-hover:text-remuse-accent">创建新展馆</span>
+                    <span className="font-display text-xs text-neutral-400 group-hover:text-remuse-accent">创建新展馆</span>
                  </div>
                </div>
             </div>
@@ -234,7 +246,11 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
                     <label className="block text-xs font-mono text-neutral-500 mb-2">封面图片</label>
                     <div 
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full h-32 border-2 border-dashed border-neutral-700 hover:border-remuse-accent cursor-pointer flex flex-col items-center justify-center overflow-hidden bg-neutral-900 relative"
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label="点击上传封面图"
+                      className="w-full h-32 border-2 border-dashed border-neutral-700 hover:border-remuse-accent cursor-pointer flex flex-col items-center justify-center overflow-hidden bg-neutral-900 relative focus:outline-none focus:ring-2 focus:ring-remuse-accent"
                     >
                        {newHallImage ? (
                          <img src={newHallImage} alt="Preview" className="w-full h-full object-cover" />

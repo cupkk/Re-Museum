@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import logger from '../services/logger';
 
 interface Props {
   children: React.ReactNode;
@@ -19,7 +20,7 @@ class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[REMUSE Error Boundary]', error, info.componentStack);
+    logger.error('[Error Boundary]', error, info.componentStack);
   }
 
   handleReset = () => {

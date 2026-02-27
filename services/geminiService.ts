@@ -1,6 +1,7 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { ItemCategory, Difficulty } from "../types";
+import { ItemCategory, Difficulty, RemuseIdea } from "../types";
+import logger from './logger';
 
 // ============================================================
 // API Key 安全策略：
@@ -252,12 +253,12 @@ export const analyzeItemImage = async (base64Image: string): Promise<{
     return { ...data, category };
 
   } catch (error) {
-    console.error("Analysis failed:", error);
+    logger.error("Analysis failed:", error);
     throw classifyError(error);
   }
 };
 
-export const generateRemuseIdeas = async (itemDescription: string, material: string): Promise<any[]> => {
+export const generateRemuseIdeas = async (itemDescription: string, material: string): Promise<RemuseIdea[]> => {
     try {
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
@@ -289,7 +290,7 @@ export const generateRemuseIdeas = async (itemDescription: string, material: str
         return JSON.parse(text);
 
     } catch (e) {
-        console.error("Idea generation failed:", e);
+        logger.error("Idea generation failed:", e);
         return [];
     }
 }
@@ -382,7 +383,7 @@ export const generateSticker = async (base64Image: string, itemName: string): Pr
     
     // Fallback if image generation isn't supported in current env or fails to return image part
     if (!stickerImageUrl) {
-        console.warn("Image generation returned no image data, using original as fallback.");
+        logger.warn("Image generation returned no image data, using original as fallback.");
         stickerImageUrl = `data:image/jpeg;base64,${base64Image}`;
     }
 
@@ -392,7 +393,7 @@ export const generateSticker = async (base64Image: string, itemName: string): Pr
     return { stickerImageUrl, dramaText };
 
   } catch (e) {
-    console.error("Sticker generation failed", e);
+    logger.error("Sticker generation failed", e);
     throw classifyError(e);
   }
 };

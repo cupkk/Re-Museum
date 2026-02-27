@@ -19,10 +19,14 @@ const NavItem: React.FC<{
 }> = ({ icon, label, active, onClick, desktop }) => (
   <button 
     onClick={onClick}
+    role="tab"
+    aria-selected={active}
+    aria-current={active ? 'page' : undefined}
+    aria-label={label}
     className={`flex flex-col items-center justify-center p-2 w-full md:w-auto md:flex-row md:justify-start md:px-6 md:py-4 md:gap-4 transition-all duration-300
       ${active 
         ? 'text-remuse-accent bg-neutral-900 border-t-2 md:border-t-0 md:border-l-2 border-remuse-accent' 
-        : 'text-neutral-500 hover:text-neutral-300'}
+        : 'text-neutral-400 hover:text-neutral-200'}
       ${desktop ? 'hidden md:flex' : ''}  
       `}
   >
@@ -78,13 +82,13 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar (Desktop) */}
-        <nav className="hidden md:flex flex-col w-64 bg-remuse-panel border-r border-remuse-border z-40">
+        <nav aria-label="主导航" className="hidden md:flex flex-col w-64 bg-remuse-panel border-r border-remuse-border z-40">
            <div className="p-8 border-b border-remuse-border">
              <h1 className="text-2xl font-bold tracking-tight font-display">REMUSE</h1>
-             <p className="text-[10px] text-neutral-500 font-mono mt-2">V 1.0.0 // ONLINE</p>
+             <p className="text-[10px] text-neutral-400 font-mono mt-2">V 1.0.0 // ONLINE</p>
            </div>
            
-           <div className="flex-1 py-4 space-y-1">
+           <div className="flex-1 py-4 space-y-1" role="tablist" aria-label="页面导航">
              <NavItem 
                icon={<ScanLine size={20}/>} 
                label="扫描仪" 
@@ -125,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
 
            <div className="p-6 border-t border-remuse-border">
              <div className="bg-neutral-900 p-4 rounded border border-neutral-800 transition-all duration-300">
-               <span className="text-xs text-neutral-500 font-mono block mb-1">环保积分</span>
+               <span className="text-xs text-neutral-400 font-mono block mb-1">环保积分</span>
                <div className="flex items-center gap-2">
                     <span className={`text-2xl font-bold text-remuse-secondary transition-all duration-300 ${isPointsAnimating ? 'scale-110 text-white' : ''}`}>
                         {displayPoints.toLocaleString()}
@@ -139,13 +143,13 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
         </nav>
 
         {/* Main Content Area */}
-        <main className="flex-1 relative overflow-hidden flex flex-col">
+        <main aria-label="内容区域" className="flex-1 relative overflow-hidden flex flex-col">
            {children}
         </main>
       </div>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden bg-remuse-panel border-t border-remuse-border grid grid-cols-5 items-center z-50 safe-area-pb h-16">
+      <nav aria-label="移动端导航" className="md:hidden bg-remuse-panel border-t border-remuse-border grid grid-cols-5 items-center z-50 safe-area-pb h-16">
         
         {/* Left Group */}
         <NavItem 
@@ -165,6 +169,8 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
         <div className="relative flex justify-center items-center -top-5">
           <button 
             onClick={() => onChangeView('MUSEUM')}
+            aria-label="藏品馆"
+            aria-current={currentView === 'MUSEUM' ? 'page' : undefined}
             className="group relative w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-transform hover:scale-105 active:scale-95"
           >
             {/* Pulsing rings */}

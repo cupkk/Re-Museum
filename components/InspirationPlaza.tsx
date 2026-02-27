@@ -152,7 +152,7 @@ const InspirationPlaza: React.FC = () => {
       </div>
 
       {/* Loading Sentinel */}
-      <div className="py-8 text-center text-neutral-600 font-mono text-xs animate-pulse">
+      <div className="py-8 text-center text-neutral-400 font-mono text-xs animate-pulse">
           LOADING STREAM...
       </div>
     </div>

@@ -131,7 +131,7 @@ const LaunchScreen: React.FC<LaunchScreenProps> = ({ onComplete }) => {
 
         {/* Loading Text */}
         <div className="absolute -bottom-12 w-full text-center">
-            <span className="font-mono text-xs text-neutral-600 tracking-[0.2em] uppercase animate-pulse">
+            <span className="font-mono text-xs text-neutral-400 tracking-[0.2em] uppercase animate-pulse">
                 System Initializing...
             </span>
         </div>
