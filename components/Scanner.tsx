@@ -9,6 +9,7 @@ interface ScannerProps {
   onItemAdded: (item: CollectedItem) => void;
   onStickerCreated: (sticker: Sticker) => void;
   onCancel: () => void;
+  onViewDetail: (item: CollectedItem) => void;
 }
 
 const ScrambleButton: React.FC<{ 
@@ -22,7 +23,7 @@ const ScrambleButton: React.FC<{
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
 
     useEffect(() => {
-        let interval: any;
+        let interval: ReturnType<typeof setInterval> | undefined;
         if (isHovering) {
             let iteration = 0;
             interval = setInterval(() => {
@@ -72,13 +73,14 @@ const ScrambleButton: React.FC<{
     );
 };
 
-const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated, onCancel }) => {
+const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated, onCancel, onViewDetail }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingSticker, setIsGeneratingSticker] = useState(false);
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [statusText, setStatusText] = useState("准备归档");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
   
   // Hall Selection State
   const [selectedHallId, setSelectedHallId] = useState<string | null>(null);
@@ -92,9 +94,29 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
 
   const selectedHallName = halls.find(h => h.id === selectedHallId)?.name;
 
+  // Cleanup Blob URLs on unmount or when preview changes
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Revoke previous Blob URL
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      
+      // Abort any in-flight analysis
+      if (abortRef.current) {
+        abortRef.current.abort();
+      }
+      
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
       setErrorInfo(null);
@@ -106,6 +128,13 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
   };
 
   const processImage = async (file: File, directUrl?: string) => {
+    // Abort any previous in-flight request
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortRef.current = controller;
+    
     setIsAnalyzing(true);
     setStatusText("正在扫描物质结构...");
     setAnalysisResult(null);
@@ -117,12 +146,15 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
 
     try {
       const base64 = await fileToGenerativePart(file);
+      if (controller.signal.aborted) return;
       
       setStatusText("Gemini 视觉系统识别中...");
       const analysis = await analyzeItemImage(base64);
+      if (controller.signal.aborted) return;
       
       setStatusText("正在计算再生潜力...");
       const ideas = await generateRemuseIdeas(analysis.name, analysis.material);
+      if (controller.signal.aborted) return;
 
       const newItem: CollectedItem = {
         id: crypto.randomUUID(),
@@ -141,16 +173,17 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
       onItemAdded(newItem);
       setIsAnalyzing(false);
 
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
+      if (controller.signal.aborted) return; // Ignore aborted requests
+      const error = err as Record<string, unknown>;
       // 结构化错误：如果是 classifyError 返回的已分类错误，直接使用
-      if (err && err.category && err.title && err.suggestion) {
-        setErrorInfo(err as AnalysisError);
+      if (error && error.category && error.title && error.suggestion) {
+        setErrorInfo(error as unknown as AnalysisError);
       } else {
         setErrorInfo({
           category: 'UNKNOWN',
           title: '分析失败',
-          message: err?.message || '未知错误',
+          message: (error?.message as string) || '未知错误',
           suggestion: '请重试。如果问题持续出现，尝试更换图片。',
         });
       }
@@ -187,15 +220,15 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
 
         setGeneratedSticker(newSticker);
         onStickerCreated(newSticker);
-    } catch (e: any) {
-        console.error("Sticker Gen Error", e);
-        if (e && e.category && e.title && e.suggestion) {
-          setErrorInfo(e as AnalysisError);
+    } catch (e: unknown) {
+        const error = e as Record<string, unknown>;
+        if (error && error.category && error.title && error.suggestion) {
+          setErrorInfo(error as unknown as AnalysisError);
         } else {
           setErrorInfo({
             category: 'UNKNOWN',
             title: '贴纸生成失败',
-            message: e?.message || '未知错误',
+            message: (error?.message as string) || '未知错误',
             suggestion: '请重试。如果问题持续，尝试重新拍摄图片。',
           });
         }
@@ -411,7 +444,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                         返回首页
                     </button>
                     <button 
-                        onClick={onCancel} // In a real app, maybe go to detail
+                        onClick={() => analysisResult && onViewDetail(analysisResult)}
                         className="py-3 bg-remuse-accent text-black font-bold hover:bg-white transition-colors font-display text-sm flex items-center justify-center gap-2"
                     >
                         查看详情 <ArrowRight size={16} />

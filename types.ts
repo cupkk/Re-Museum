@@ -76,4 +76,4 @@ export interface GuideData {
   seasonal: string[];
 }
 
-export type ViewState = 'MUSEUM' | 'SCANNER' | 'ITEM_DETAIL' | 'PROFILE' | 'GUIDE' | 'STICKER_LIBRARY';
+export type ViewState = 'MUSEUM' | 'SCANNER' | 'ITEM_DETAIL' | 'PROFILE' | 'GUIDE' | 'STICKER_LIBRARY' | 'INSPIRATION';

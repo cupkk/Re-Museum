@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ViewState } from '../types';
-import { Box, ScanLine, Trophy, Zap, Plus, BookOpen, Sticker } from 'lucide-react';
+import { Box, ScanLine, Trophy, Zap, Plus, BookOpen, Sticker, Compass } from 'lucide-react';
 
 interface LayoutProps {
   currentView: ViewState;
@@ -108,6 +108,12 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
                label="贴纸库" 
                active={currentView === 'STICKER_LIBRARY'} 
                onClick={() => onChangeView('STICKER_LIBRARY')}
+             />
+             <NavItem 
+               icon={<Compass size={20}/>} 
+               label="灵感广场" 
+               active={currentView === 'INSPIRATION'} 
+               onClick={() => onChangeView('INSPIRATION')}
              />
              <NavItem 
                icon={<Trophy size={20}/>} 

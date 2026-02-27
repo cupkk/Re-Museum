@@ -226,7 +226,23 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete 
                        </>
                    )}
                  </button>
-                 <button className="bg-transparent border border-neutral-600 text-white p-4 hover:border-white transition-colors">
+                 <button 
+                   onClick={async () => {
+                     const shareText = `🌿 我用 REMUSE 把「${item.name}」变成了「${selectedIdea?.title}」！\n\n${selectedIdea?.description || ''}\n\n#REMUSE #万物再生`;
+                     if (navigator.share) {
+                       try {
+                         await navigator.share({ title: `REMUSE · ${item.name}`, text: shareText });
+                       } catch {}
+                     } else {
+                       await navigator.clipboard.writeText(shareText);
+                       const btn = document.activeElement as HTMLElement;
+                       const original = btn?.title;
+                       if (btn) { btn.title = '已复制！'; setTimeout(() => { btn.title = original || ''; }, 2000); }
+                     }
+                   }}
+                   title="分享"
+                   className="bg-transparent border border-neutral-600 text-white p-4 hover:border-white transition-colors"
+                 >
                    <Share2 size={20} />
                  </button>
               </div>

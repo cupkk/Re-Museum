@@ -9,6 +9,8 @@ import Onboarding from './components/Onboarding'; // Import Onboarding
 import CuratorOffice from './components/CuratorOffice';
 import CollectionGuide from './components/CollectionGuide';
 import StickerLibrary from './components/StickerLibrary';
+import InspirationPlaza from './components/InspirationPlaza';
+import ErrorBoundary from './components/ErrorBoundary';
 import { CollectedItem, ItemCategory, ViewState, Difficulty, ExhibitionHall, GuideData, Sticker } from './types';
 
 // Mock Data for Initial Load
@@ -176,7 +178,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
+    <ErrorBoundary>
       {showLaunch && <LaunchScreen onComplete={handleLaunchComplete} />}
       
       {/* Show Onboarding after Launch and before Layout if needed */}
@@ -195,7 +197,11 @@ const App: React.FC = () => {
               halls={halls}
               onItemAdded={handleAddItem} 
               onStickerCreated={handleStickerCreated}
-              onCancel={() => setCurrentView('MUSEUM')} 
+              onCancel={() => setCurrentView('MUSEUM')}
+              onViewDetail={(item) => {
+                setSelectedItem(item);
+                setCurrentView('ITEM_DETAIL');
+              }}
             />
           )}
 
@@ -234,9 +240,13 @@ const App: React.FC = () => {
           {currentView === 'PROFILE' && (
             <CuratorOffice items={items} />
           )}
+
+          {currentView === 'INSPIRATION' && (
+            <InspirationPlaza />
+          )}
         </Layout>
       )}
-    </>
+    </ErrorBoundary>
   );
 };
 
