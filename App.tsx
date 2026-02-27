@@ -1,16 +1,18 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Layout from './components/Layout';
 import Scanner from './components/Scanner';
 import Gallery from './components/Gallery';
 import IdeaGenerator from './components/IdeaGenerator';
 import LaunchScreen from './components/LaunchScreen';
-import Onboarding from './components/Onboarding'; // Import Onboarding
+import Onboarding from './components/Onboarding';
 import CuratorOffice from './components/CuratorOffice';
 import CollectionGuide from './components/CollectionGuide';
 import StickerLibrary from './components/StickerLibrary';
 import InspirationPlaza from './components/InspirationPlaza';
 import ErrorBoundary from './components/ErrorBoundary';
+import SkeletonScreen from './components/SkeletonScreen';
+import MilestoneCelebration, { isMilestone } from './components/MilestoneCelebration';
 import { CollectedItem, ItemCategory, ViewState, Difficulty, ExhibitionHall, GuideData, Sticker } from './types';
 
 // Mock Data for Initial Load
@@ -94,7 +96,7 @@ const INITIAL_HALLS: ExhibitionHall[] = Object.values(ItemCategory).map(cat => (
 
 const App: React.FC = () => {
   const [showLaunch, setShowLaunch] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false); // New state for onboarding
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Default view is SCANNER
   const [currentView, setCurrentView] = useState<ViewState>('SCANNER');
@@ -102,6 +104,14 @@ const App: React.FC = () => {
   const [halls, setHalls] = useState<ExhibitionHall[]>(INITIAL_HALLS);
   const [stickers, setStickers] = useState<Sticker[]>([]);
   const [selectedItem, setSelectedItem] = useState<CollectedItem | null>(null);
+
+  // Skeleton transition state
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showContent, setShowContent] = useState(true);
+  const prevViewRef = useRef<ViewState>(currentView);
+
+  // Milestone celebration state
+  const [milestoneInfo, setMilestoneInfo] = useState<{ count: number; name: string } | null>(null);
   
   // Guide State
   const [guideData, setGuideData] = useState<GuideData>({
@@ -109,6 +119,22 @@ const App: React.FC = () => {
     rare: [],
     seasonal: []
   });
+
+  // --- View transition with skeleton ---
+  const handleChangeView = useCallback((newView: ViewState) => {
+    if (newView === currentView) return;
+    prevViewRef.current = currentView;
+    setIsTransitioning(true);
+    setShowContent(false);
+
+    // Show skeleton briefly, then reveal actual content
+    setTimeout(() => {
+      setCurrentView(newView);
+      setIsTransitioning(false);
+      // Small delay for enter animation
+      requestAnimationFrame(() => setShowContent(true));
+    }, 280);
+  }, [currentView]);
 
   // Handle Launch Completion
   const handleLaunchComplete = () => {
@@ -138,7 +164,34 @@ const App: React.FC = () => {
   }, [items]);
 
   const handleAddItem = (newItem: CollectedItem) => {
-    setItems(prev => [newItem, ...prev]);
+    setItems(prev => {
+      const updated = [newItem, ...prev];
+      const newCount = updated.length;
+      // Check for milestone
+      if (isMilestone(newCount)) {
+        setTimeout(() => setMilestoneInfo({ count: newCount, name: newItem.name }), 600);
+      }
+      return updated;
+    });
+  };
+
+  const handleUpdateItem = (updatedItem: CollectedItem) => {
+    setItems(prev => prev.map(item => 
+      item.id === updatedItem.id ? updatedItem : item
+    ));
+    // Also sync selectedItem if viewing detail
+    if (selectedItem?.id === updatedItem.id) {
+      setSelectedItem(updatedItem);
+    }
+  };
+
+  const handleDeleteItem = (itemId: string) => {
+    setItems(prev => prev.filter(item => item.id !== itemId));
+    // Navigate back from detail view
+    if (selectedItem?.id === itemId) {
+      setSelectedItem(null);
+      handleChangeView('MUSEUM');
+    }
   };
 
   const handleStickerCreated = (newSticker: Sticker) => {
@@ -151,7 +204,7 @@ const App: React.FC = () => {
 
   const handleSelectItem = (item: CollectedItem) => {
     setSelectedItem(item);
-    setCurrentView('ITEM_DETAIL');
+    handleChangeView('ITEM_DETAIL');
   };
 
   const handleCompleteRemuse = (itemId: string) => {
@@ -189,18 +242,27 @@ const App: React.FC = () => {
       {!showLaunch && !showOnboarding && (
         <Layout 
             currentView={currentView} 
-            onChangeView={setCurrentView}
+            onChangeView={handleChangeView}
             ecoPoints={ecoPoints}
         >
+          {/* Skeleton overlay during transition */}
+          {isTransitioning && (
+            <div className="absolute inset-0 z-30">
+              <SkeletonScreen view={currentView} />
+            </div>
+          )}
+
+          {/* Actual content with enter animation */}
+          <div className={`h-full transition-opacity duration-200 ${showContent && !isTransitioning ? 'opacity-100 animate-view-enter' : 'opacity-0'}`}>
           {currentView === 'SCANNER' && (
             <Scanner 
               halls={halls}
               onItemAdded={handleAddItem} 
               onStickerCreated={handleStickerCreated}
-              onCancel={() => setCurrentView('MUSEUM')}
+              onCancel={() => handleChangeView('MUSEUM')}
               onViewDetail={(item) => {
                 setSelectedItem(item);
-                setCurrentView('ITEM_DETAIL');
+                handleChangeView('ITEM_DETAIL');
               }}
             />
           )}
@@ -232,8 +294,10 @@ const App: React.FC = () => {
           {currentView === 'ITEM_DETAIL' && selectedItem && (
             <IdeaGenerator 
               item={selectedItem} 
-              onBack={() => setCurrentView('MUSEUM')}
+              onBack={() => handleChangeView('MUSEUM')}
               onComplete={handleCompleteRemuse}
+              onUpdateItem={handleUpdateItem}
+              onDeleteItem={handleDeleteItem}
             />
           )}
 
@@ -244,7 +308,17 @@ const App: React.FC = () => {
           {currentView === 'INSPIRATION' && (
             <InspirationPlaza />
           )}
+          </div>
         </Layout>
+      )}
+
+      {/* Milestone Celebration Overlay */}
+      {milestoneInfo && (
+        <MilestoneCelebration
+          itemCount={milestoneInfo.count}
+          itemName={milestoneInfo.name}
+          onDismiss={() => setMilestoneInfo(null)}
+        />
       )}
     </ErrorBoundary>
   );

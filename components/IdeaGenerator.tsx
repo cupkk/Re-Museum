@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { CollectedItem, Difficulty, RemuseIdea } from '../types';
-import { ArrowLeft, Hammer, Clock, CheckCircle2, Share2, Hexagon, Zap } from 'lucide-react';
+import { CollectedItem, Difficulty, RemuseIdea, ItemCategory } from '../types';
+import { ArrowLeft, Hammer, Clock, CheckCircle2, Share2, Hexagon, Zap, Pencil, Trash2, Save, XCircle } from 'lucide-react';
 
 interface IdeaGeneratorProps {
   item: CollectedItem;
   onBack: () => void;
   onComplete: (itemId: string) => void;
+  onUpdateItem?: (updatedItem: CollectedItem) => void;
+  onDeleteItem?: (itemId: string) => void;
 }
 
 const DifficultyRating: React.FC<{ level: Difficulty }> = ({ level }) => {
@@ -27,27 +29,54 @@ const DifficultyRating: React.FC<{ level: Difficulty }> = ({ level }) => {
   );
 };
 
-const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete }) => {
+const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete, onUpdateItem, onDeleteItem }) => {
   const [selectedIdea, setSelectedIdea] = useState<RemuseIdea | null>(item.ideas?.[0] || null);
   const [showCelebration, setShowCelebration] = useState(false);
   
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(item.name);
+  const [editCategory, setEditCategory] = useState(item.category);
+  const [editStory, setEditStory] = useState(item.story || '');
+
+  // Delete confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   // Is this item already completed (either from props or just now)?
   const isCompleted = item.status === 'remused';
 
   const handleCompleteClick = () => {
     if (isCompleted) return;
-
-    // Trigger visual feedback
     setShowCelebration(true);
-
-    // Call actual update
     onComplete(item.id);
-
-    // Turn off animation after a while
-    setTimeout(() => {
-        setShowCelebration(false);
-    }, 2000);
+    setTimeout(() => { setShowCelebration(false); }, 2000);
   };
+
+  const handleSaveEdit = () => {
+    if (!onUpdateItem) return;
+    const updated: CollectedItem = {
+      ...item,
+      name: editName.trim() || item.name,
+      category: editCategory,
+      story: editStory.trim() || undefined,
+    };
+    onUpdateItem(updated);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditName(item.name);
+    setEditCategory(item.category);
+    setEditStory(item.story || '');
+    setIsEditing(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!onDeleteItem) return;
+    onDeleteItem(item.id);
+  };
+
+  const allCategories = Object.values(ItemCategory) as string[];
 
   return (
     <div className="h-full flex flex-col lg:flex-row overflow-hidden bg-remuse-dark relative">
@@ -93,6 +122,57 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete 
           <ArrowLeft size={20} />
         </button>
         
+        {/* Edit/Delete buttons */}
+        {(onUpdateItem || onDeleteItem) && !isEditing && (
+          <div className="absolute top-4 right-4 z-20 flex gap-2">
+            {onUpdateItem && (
+              <button
+                onClick={() => setIsEditing(true)}
+                aria-label="编辑物品信息"
+                className="bg-black/50 p-2 rounded-full hover:bg-remuse-accent/20 transition text-neutral-300 hover:text-remuse-accent"
+              >
+                <Pencil size={16} />
+              </button>
+            )}
+            {onDeleteItem && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                aria-label="删除物品"
+                className="bg-black/50 p-2 rounded-full hover:bg-red-500/20 transition text-neutral-300 hover:text-red-400"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center p-6">
+            <div className="bg-remuse-panel border border-red-900/60 p-6 max-w-xs w-full clip-corner animate-fade-in">
+              <h3 className="text-lg font-display font-bold text-white mb-2">确认删除</h3>
+              <p className="text-sm text-neutral-400 mb-1">
+                确定要删除「{item.name}」吗？
+              </p>
+              <p className="text-xs text-red-400/80 font-mono mb-6">此操作不可撤销</p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="py-2.5 border border-neutral-700 text-neutral-400 hover:text-white hover:border-white transition-colors font-display text-sm"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="py-2.5 bg-red-600 text-white font-bold hover:bg-red-500 transition-colors font-display text-sm flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={14} /> 删除
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="h-1/2 lg:h-2/3 relative">
           <img 
             src={item.imageUrl} 
@@ -104,10 +184,65 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete 
             <div className="inline-block px-2 py-1 bg-remuse-accent text-black font-bold font-mono text-xs mb-2">
               ID: {item.id.split('-')[0].toUpperCase()}
             </div>
-            <h1 className="text-3xl font-display font-bold text-white mb-2 leading-none">{item.name}</h1>
-            <p className="text-neutral-400 italic font-mono text-sm border-l-2 border-remuse-accent pl-3">
-              {item.story}
-            </p>
+
+            {/* Editable or static display */}
+            {isEditing ? (
+              <div className="space-y-3 bg-black/60 p-4 rounded-lg backdrop-blur-sm">
+                <div>
+                  <label className="block text-[10px] text-neutral-400 font-mono mb-1">名称</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full bg-neutral-900 border border-neutral-700 text-white px-3 py-2 text-sm font-display focus:border-remuse-accent focus:outline-none transition-colors"
+                    placeholder="物品名称"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-neutral-400 font-mono mb-1">分类</label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                    className="w-full bg-neutral-900 border border-neutral-700 text-white px-3 py-2 text-sm font-display focus:border-remuse-accent focus:outline-none transition-colors appearance-none"
+                  >
+                    {allCategories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-neutral-400 font-mono mb-1">故事</label>
+                  <textarea
+                    value={editStory}
+                    onChange={(e) => setEditStory(e.target.value)}
+                    rows={3}
+                    className="w-full bg-neutral-900 border border-neutral-700 text-white px-3 py-2 text-sm font-sans focus:border-remuse-accent focus:outline-none transition-colors resize-none"
+                    placeholder="这件物品的故事..."
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveEdit}
+                    className="flex-1 py-2 bg-remuse-accent text-black font-bold font-display text-sm flex items-center justify-center gap-1.5 hover:bg-white transition-colors"
+                  >
+                    <Save size={14} /> 保存
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="flex-1 py-2 border border-neutral-600 text-neutral-300 font-display text-sm flex items-center justify-center gap-1.5 hover:border-white hover:text-white transition-colors"
+                  >
+                    <XCircle size={14} /> 取消
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-3xl font-display font-bold text-white mb-2 leading-none">{item.name}</h1>
+                <p className="text-neutral-400 italic font-mono text-sm border-l-2 border-remuse-accent pl-3">
+                  {item.story}
+                </p>
+              </>
+            )}
           </div>
         </div>
         

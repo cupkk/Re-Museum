@@ -233,6 +233,8 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
   };
 
   const triggerInput = () => fileInputRef.current?.click();
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const triggerCamera = () => cameraInputRef.current?.click();
 
   return (
     <div className="h-full flex flex-col items-center justify-center p-6 relative bg-remuse-dark">
@@ -364,13 +366,9 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                 />
             </div>
             <div 
-              onClick={triggerInput}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerInput(); } }}
-              role="button"
-              tabIndex={0}
-              aria-label="拍摄或上传图片"
-              className="group cursor-pointer border-2 border-dashed border-neutral-700 hover:border-remuse-accent transition-colors bg-remuse-panel/50 p-12 flex flex-col items-center justify-center min-h-[300px] clip-corner focus:outline-none focus:ring-2 focus:ring-remuse-accent"
+              className="group border-2 border-dashed border-neutral-700 bg-remuse-panel/50 p-8 flex flex-col items-center justify-center min-h-[300px] clip-corner"
             >
+              {/* Hidden file inputs */}
               <input 
                 type="file" 
                 accept="image/*" 
@@ -378,13 +376,40 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                 ref={fileInputRef}
                 onChange={handleFileChange}
               />
-              <div className="w-16 h-16 bg-neutral-800 group-hover:bg-remuse-accent group-hover:text-black rounded-full flex items-center justify-center mb-4 transition-all">
-                <Camera size={32} />
+              <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment"
+                className="hidden" 
+                ref={cameraInputRef}
+                onChange={handleFileChange}
+              />
+
+              <div className="w-16 h-16 bg-neutral-800 rounded-full flex items-center justify-center mb-4">
+                <Camera size={32} className="text-neutral-400" />
               </div>
-              <span className="font-display text-lg text-neutral-300">拍摄 / 上传</span>
-              <span className="text-xs text-neutral-400 mt-2 font-mono text-center">
-                支持 JPG, PNG <br/> AI 自动开始分析
+              <span className="font-display text-lg text-neutral-300 mb-1">归档你的物品</span>
+              <span className="text-xs text-neutral-400 font-mono text-center mb-6">
+                支持 JPG, PNG · AI 自动分析
               </span>
+
+              {/* Two action buttons */}
+              <div className="flex gap-3 w-full max-w-xs">
+                <button
+                  onClick={triggerCamera}
+                  aria-label="使用相机拍照"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-remuse-accent text-black font-bold font-display text-sm hover:bg-white transition-colors clip-corner focus:outline-none focus:ring-2 focus:ring-remuse-accent"
+                >
+                  <Camera size={18} /> 拍照
+                </button>
+                <button
+                  onClick={triggerInput}
+                  aria-label="从相册选择图片"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 border border-neutral-600 text-neutral-300 font-display text-sm hover:border-white hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-remuse-secondary"
+                >
+                  <Upload size={18} /> 相册
+                </button>
+              </div>
             </div>
           </div>
         )}
