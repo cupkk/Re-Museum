@@ -9,11 +9,29 @@ set -e
 echo "🏛️  Re-Museum 部署脚本"
 echo "========================"
 
+install_system_pkg() {
+    if command -v dnf >/dev/null 2>&1; then
+        sudo dnf install -y "$@"
+    elif command -v yum >/dev/null 2>&1; then
+        sudo yum install -y "$@"
+    elif command -v apt-get >/dev/null 2>&1; then
+        sudo apt-get update -y
+        sudo apt-get install -y "$@"
+    else
+        echo "❌ 未识别的包管理器，请手动安装: $*"
+        exit 1
+    fi
+}
+
 # 1. 检查 Node.js
 if ! command -v node &> /dev/null; then
     echo "📦 安装 Node.js 20.x ..."
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+    if command -v apt-get >/dev/null 2>&1; then
+        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    else
+        curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo -E bash -
+    fi
+    install_system_pkg nodejs
 fi
 
 echo "✅ Node.js $(node -v)"
