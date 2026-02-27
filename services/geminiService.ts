@@ -2,13 +2,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ItemCategory, Difficulty } from "../types";
 
-const apiKey = process.env.API_KEY || '';
-const baseUrl = process.env.GEMINI_BASE_URL || '';
+// ============================================================
+// API Key 安全策略：
+//   Key 不再注入前端包，真实 Key 由服务端代理注入。
+//   客户端使用占位符 'PROXIED'，SDK 仍需要一个非空值。
+//   所有请求经由代理端点（开发: Vite proxy / 生产: 自建后端）。
+// ============================================================
+const proxyUrl = (typeof process !== 'undefined' && process.env?.GEMINI_PROXY_URL) || '/api/gemini';
 
-// 支持国内中转站：如果配置了 GEMINI_BASE_URL，则优先使用
 const ai = new GoogleGenAI({
-  apiKey,
-  ...(baseUrl ? { httpOptions: { baseUrl } } : {}),
+  apiKey: 'PROXIED',
+  httpOptions: { baseUrl: proxyUrl },
 });
 
 // ============================================================

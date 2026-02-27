@@ -545,30 +545,29 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
         link.click();
     };
 
-    // --- Drag & Drop Logic ---
+    // --- Unified Pointer Logic (mouse + touch) ---
 
-    const handleMouseDown = (e: React.MouseEvent, instanceId: string) => {
+    const handlePointerDown = (clientX: number, clientY: number, instanceId: string) => {
         if (!isCustomMode || !canvasRef.current) return;
-        
+
         setActiveDragId(instanceId);
-        
+
         // Bring to front
         setLayoutItems(prev => {
             const maxZ = Math.max(...prev.map(i => i.zIndex));
-            return prev.map(item => 
+            return prev.map(item =>
                 item.instanceId === instanceId ? { ...item, zIndex: maxZ + 1 } : item
             );
         });
     };
 
-    const handleMouseMove = (e: React.MouseEvent) => {
+    const handlePointerMove = (clientX: number, clientY: number) => {
         if (!activeDragId || !isCustomMode || !canvasRef.current) return;
 
         const rect = canvasRef.current.getBoundingClientRect();
-        const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
-        const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+        const xPercent = ((clientX - rect.left) / rect.width) * 100;
+        const yPercent = ((clientY - rect.top) / rect.height) * 100;
 
-        // Clamp to some bounds so we don't lose items
         const clampedX = Math.max(0, Math.min(100, xPercent));
         const clampedY = Math.max(0, Math.min(100, yPercent));
 
@@ -580,15 +579,45 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
         }));
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
         setActiveDragId(null);
     };
 
-    // Global mouse up to catch drops outside the element
+    // Mouse handlers
+    const handleMouseDown = (e: React.MouseEvent, instanceId: string) => {
+        handlePointerDown(e.clientX, e.clientY, instanceId);
+    };
+    const handleMouseMove = (e: React.MouseEvent) => {
+        handlePointerMove(e.clientX, e.clientY);
+    };
+    const handleMouseUp = () => handlePointerUp();
+
+    // Touch handlers — 移动端拖拽支持
+    const handleTouchStart = (e: React.TouchEvent, instanceId: string) => {
+        if (e.touches.length === 1) {
+            e.preventDefault(); // 阻止页面滚动
+            handlePointerDown(e.touches[0].clientX, e.touches[0].clientY, instanceId);
+        }
+    };
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (e.touches.length === 1 && activeDragId) {
+            e.preventDefault();
+            handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    };
+    const handleTouchEnd = () => handlePointerUp();
+
+    // Global pointer up (mouse + touch) — catch drops outside the element
     useEffect(() => {
         const handleGlobalUp = () => setActiveDragId(null);
         window.addEventListener('mouseup', handleGlobalUp);
-        return () => window.removeEventListener('mouseup', handleGlobalUp);
+        window.addEventListener('touchend', handleGlobalUp);
+        window.addEventListener('touchcancel', handleGlobalUp);
+        return () => {
+            window.removeEventListener('mouseup', handleGlobalUp);
+            window.removeEventListener('touchend', handleGlobalUp);
+            window.removeEventListener('touchcancel', handleGlobalUp);
+        };
     }, []);
 
 
@@ -873,10 +902,13 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                     <div 
                         ref={canvasRef}
                         onMouseMove={handleMouseMove}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                         className={`
                             relative w-full max-w-3xl aspect-[4/3] bg-black shadow-2xl border border-neutral-800 overflow-hidden
                             ${isCustomMode ? 'cursor-default' : ''}
                         `}
+                        style={{ touchAction: isCustomMode ? 'none' : 'auto' }}
                     >
                          {/* Removed Grid Visual */}
 
@@ -884,13 +916,15 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                              <div
                                 key={item.instanceId}
                                 onMouseDown={(e) => handleMouseDown(e, item.instanceId)}
+                                onTouchStart={(e) => handleTouchStart(e, item.instanceId)}
                                 style={{
                                     position: 'absolute',
                                     left: `${item.x}%`,
                                     top: `${item.y}%`,
                                     transform: `translate(-50%, -50%) rotate(${item.rotation}deg) scale(${item.scale})`,
                                     zIndex: item.zIndex,
-                                    cursor: isCustomMode ? (activeDragId === item.instanceId ? 'grabbing' : 'grab') : 'default'
+                                    cursor: isCustomMode ? (activeDragId === item.instanceId ? 'grabbing' : 'grab') : 'default',
+                                    touchAction: 'none'
                                 }}
                                 className={`
                                     w-32 md:w-48 transition-transform duration-300 ease-out select-none

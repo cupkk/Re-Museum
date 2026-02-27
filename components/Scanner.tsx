@@ -163,7 +163,8 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
         material: analysis.material,
         story: analysis.story,
         tags: analysis.tags,
-        imageUrl: effectiveImageUrl,
+        // Store as data URL so blob URL can be safely revoked
+        imageUrl: `data:${file.type || 'image/jpeg'};base64,${base64}`,
         dateCollected: new Date().toISOString(),
         status: 'raw',
         ideas: ideas
@@ -192,20 +193,14 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
   };
 
   const handleGenerateSticker = async () => {
-    if (!analysisResult || !previewUrl) return;
+    if (!analysisResult) return;
     
     setIsGeneratingSticker(true);
     setStatusText("正在生成矢量贴纸与短剧...");
 
     try {
-        // Fetch base64 from current previewUrl (blob)
-        const response = await fetch(previewUrl);
-        const blob = await response.blob();
-        const base64 = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
-            reader.readAsDataURL(blob);
-        });
+        // Extract base64 from stored data URL (no blob fetch needed)
+        const base64 = analysisResult.imageUrl.split(',')[1];
 
         const { stickerImageUrl, dramaText } = await generateSticker(base64, analysisResult.name);
         

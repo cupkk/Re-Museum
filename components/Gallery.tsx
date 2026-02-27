@@ -47,6 +47,10 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      // Revoke previous blob URL to prevent memory leak
+      if (newHallImage && newHallImage.startsWith('blob:')) {
+        URL.revokeObjectURL(newHallImage);
+      }
       const file = e.target.files[0];
       const url = URL.createObjectURL(file);
       setNewHallImage(url);
@@ -197,7 +201,15 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
              <div className="bg-remuse-panel border border-remuse-border w-full max-w-sm p-6 relative clip-corner">
                 <button 
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => {
+                    // Revoke blob URL when cancelling (hall NOT created)
+                    if (newHallImage && newHallImage.startsWith('blob:')) {
+                      URL.revokeObjectURL(newHallImage);
+                    }
+                    setShowAddModal(false);
+                    setNewHallName('');
+                    setNewHallImage('');
+                  }}
                   className="absolute top-4 right-4 text-neutral-500 hover:text-white"
                 >
                   <X size={20} />
