@@ -68,7 +68,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
               <ArrowLeft size={20} />
             </button>
             <div>
-                <h2 className="text-2xl font-bold text-white font-mono flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-white font-display flex items-center gap-2">
                     {currentHall?.name || selectedHallId} <span className="text-remuse-accent">展厅</span>
                 </h2>
                 <p className="text-xs text-neutral-500 font-mono">
@@ -99,7 +99,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
                   </div>
                   <div className="absolute bottom-0 left-0 w-full p-3 bg-gradient-to-t from-black to-transparent pt-10">
                     <p className="font-mono text-xs text-remuse-accent mb-0.5">{item.material}</p>
-                    <h3 className="font-bold text-lg leading-tight text-white">{item.name}</h3>
+                    <h3 className="font-display font-bold text-lg leading-tight text-white">{item.name}</h3>
                   </div>
                 </div>
                 <div className="p-3 border-t border-remuse-border bg-neutral-900/50 flex-1">
@@ -124,7 +124,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
     <div className="p-6 md:p-12 h-full overflow-y-auto pb-32 relative">
         {/* Header Greeting */}
         <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-xl md:text-2xl font-mono text-white tracking-[0.2em] mb-2">
+            <h1 className="text-xl md:text-2xl font-display text-white tracking-wide mb-2">
                 <span className="text-neutral-500">::</span> 馆长，日安 <span className="text-neutral-500">::</span>
             </h1>
             <p className="text-[10px] text-neutral-600 uppercase tracking-widest">
@@ -163,7 +163,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
 
                                 {/* Text Area (Bottom 25%) */}
                                 <div className="absolute bottom-0 left-0 w-full h-[25%] bg-white flex flex-col justify-center items-center px-2 z-20">
-                                    <h3 className="text-black font-bold font-mono text-sm md:text-base leading-tight truncate w-full text-center">
+                                    <h3 className="text-black font-bold font-display text-sm md:text-base leading-tight truncate w-full text-center">
                                         {hall.name}
                                     </h3>
                                     <span className="text-[10px] text-neutral-500 font-mono mt-0.5">
@@ -186,7 +186,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
                     <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center group-hover:bg-remuse-accent group-hover:text-black transition-colors">
                       <Plus size={24} />
                     </div>
-                    <span className="font-mono text-xs text-neutral-500 group-hover:text-remuse-accent">创建新展馆</span>
+                    <span className="font-display text-xs text-neutral-500 group-hover:text-remuse-accent">创建新展馆</span>
                  </div>
                </div>
             </div>
@@ -203,7 +203,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
                   <X size={20} />
                 </button>
                 
-                <h2 className="text-xl font-bold text-white font-mono mb-6">新增展馆档案</h2>
+                <h2 className="text-xl font-bold text-white font-display mb-6">新增展馆档案</h2>
                 
                 <form onSubmit={handleCreateHall} className="space-y-4">
                   <div>
@@ -245,7 +245,7 @@ const Gallery: React.FC<GalleryProps> = ({ items, halls, onSelectItem, onAddHall
                   <button 
                     type="submit"
                     disabled={!newHallName || !newHallImage}
-                    className={`w-full py-3 mt-4 font-bold font-mono flex items-center justify-center gap-2 transition-colors
+                    className={`w-full py-3 mt-4 font-bold font-display flex items-center justify-center gap-2 transition-colors
                       ${(!newHallName || !newHallImage) 
                         ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed' 
                         : 'bg-remuse-accent text-black hover:bg-white'}

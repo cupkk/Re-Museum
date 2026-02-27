@@ -323,7 +323,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                         <button onClick={() => setViewMode('LIBRARY')} className="text-neutral-500 hover:text-white">
                             <X size={24} />
                         </button>
-                        <h2 className="text-xl font-bold font-mono text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold font-display text-white flex items-center gap-2">
                             <Grid size={20} className="text-remuse-accent" />
                             STICKER COLLAGE
                         </h2>
@@ -331,13 +331,13 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                     <div className="flex items-center gap-3">
                         <button 
                             onClick={handleReLayout}
-                            className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded text-sm font-mono border border-neutral-700"
+                            className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded text-sm font-display border border-neutral-700"
                         >
                             <Shuffle size={16} /> 重新排版
                         </button>
                         <button 
                             onClick={() => setIsCustomMode(!isCustomMode)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-mono border transition-colors
+                            className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-display border transition-colors
                                 ${isCustomMode 
                                     ? 'bg-remuse-accent text-black border-remuse-accent' 
                                     : 'bg-neutral-800 text-neutral-400 border-neutral-700 hover:text-white'}
@@ -347,7 +347,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                         </button>
                         <button 
                             onClick={handleExportLayout}
-                            className="flex items-center gap-2 px-4 py-2 bg-remuse-secondary text-black hover:bg-white rounded text-sm font-mono font-bold border border-remuse-secondary transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-remuse-secondary text-black hover:bg-white rounded text-sm font-display font-bold border border-remuse-secondary transition-colors"
                         >
                             <Save size={16} /> 导出排版
                         </button>
@@ -412,11 +412,11 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
-                    <h1 className="text-4xl font-bold font-mono tracking-tighter mb-2 flex items-center gap-3">
+                    <h1 className="text-4xl font-bold font-display tracking-tight mb-2 flex items-center gap-3">
                         <StickerIcon size={36} className="text-remuse-accent" />
                         STICKER LIBRARY
                     </h1>
-                    <p className="text-neutral-500 font-mono text-sm">
+                    <p className="text-neutral-500 text-sm">
                         实体物品的数字分身与专属剧情。
                     </p>
                 </div>
@@ -431,7 +431,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                     {/* Toggle Selection Mode Button */}
                     <button 
                         onClick={toggleSelectionMode}
-                        className={`flex items-center gap-2 px-5 py-2 rounded-full font-mono text-sm border transition-all
+                        className={`flex items-center gap-2 px-5 py-2 rounded-full font-display text-sm border transition-all
                             ${isSelectionMode 
                                 ? 'bg-neutral-800 text-white border-neutral-600' 
                                 : 'bg-remuse-secondary text-black border-remuse-secondary hover:bg-cyan-300'}
@@ -449,7 +449,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                     <button
                         key={cat}
                         onClick={() => setFilter(cat)}
-                        className={`px-4 py-2 text-xs font-bold font-mono whitespace-nowrap border transition-all
+                        className={`px-4 py-2 text-xs font-bold font-display whitespace-nowrap border transition-all
                             ${filter === cat 
                                 ? 'bg-remuse-accent text-black border-remuse-accent' 
                                 : 'bg-transparent text-neutral-500 border-neutral-800 hover:border-neutral-600 hover:text-white'}
@@ -465,12 +465,12 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                 <div className="mb-6 p-4 bg-remuse-accent/10 border border-remuse-accent rounded-lg flex items-center justify-between animate-fade-in">
                     <div className="flex items-center gap-2">
                          <CheckCircle2 size={20} className="text-remuse-accent" />
-                         <span className="text-sm font-mono text-white">已选择: {selectedIds.size} / 9</span>
+                         <span className="text-sm font-display text-white">已选择: {selectedIds.size} / 9</span>
                     </div>
                     <button 
                         onClick={enterCanvasMode}
                         disabled={selectedIds.size === 0}
-                        className={`px-6 py-2 rounded font-bold font-mono text-xs transition-all
+                        className={`px-6 py-2 rounded font-bold font-display text-xs transition-all
                             ${selectedIds.size > 0 
                                 ? 'bg-remuse-accent text-black hover:scale-105' 
                                 : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'}
@@ -485,7 +485,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
             {filteredStickers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-neutral-800 rounded-lg">
                     <StickerIcon size={48} className="text-neutral-700 mb-4" />
-                    <p className="text-neutral-500 font-mono">暂无贴纸</p>
+                    <p className="text-neutral-500 font-display">暂无贴纸</p>
                     <p className="text-xs text-neutral-600 mt-2">使用扫描仪生成你的第一个贴纸</p>
                 </div>
             ) : (

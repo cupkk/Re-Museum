@@ -55,7 +55,7 @@ const ScrambleButton: React.FC<{
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                     <Box size={16} className={`${isActive ? 'text-remuse-accent' : 'text-neutral-500 group-hover:text-remuse-secondary'}`} />
-                    <span className={`font-mono text-sm tracking-widest ${isActive ? 'text-white' : 'text-neutral-300'}`}>
+                    <span className={`font-display text-sm tracking-wide ${isActive ? 'text-white' : 'text-neutral-300'}`}>
                         {display}
                     </span>
                 </div>
@@ -222,10 +222,10 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
         {/* Header (Only show if not in result view) */}
         {!analysisResult && !isAnalyzing && !errorInfo && (
             <div className="text-center mb-10">
-                <h2 className="text-4xl font-mono font-bold tracking-tighter mb-2 text-white">
+                <h2 className="text-4xl font-display font-bold tracking-tight mb-2 text-white">
                     ARCHIVE <span className="text-remuse-accent">ENTITY</span>
                 </h2>
-                <p className="text-neutral-400 text-sm font-mono">
+                <p className="text-neutral-400 text-sm">
                     将实体物品数字化以进行再生。
                 </p>
             </div>
@@ -241,7 +241,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                  <img src={previewUrl} alt="Scanning" className="w-full h-full object-cover rounded-full opacity-50 grayscale" />
                )}
             </div>
-            <h3 className="text-xl font-mono text-remuse-accent animate-pulse text-center">{statusText}</h3>
+            <h3 className="text-xl font-display text-remuse-accent animate-pulse text-center">{statusText}</h3>
             {isGeneratingSticker && (
                 <p className="text-xs text-neutral-500 mt-2 font-mono">Drawing Vector Lines...</p>
             )}
@@ -267,7 +267,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                 {(errorInfo.category === 'PARSE_ERROR' || errorInfo.category === 'UNKNOWN') && <AlertTriangle size={22} />}
               </div>
               <div>
-                <h3 className="text-lg font-bold font-mono text-white">{errorInfo.title}</h3>
+                <h3 className="text-lg font-bold font-display text-white">{errorInfo.title}</h3>
                 <span className="text-[10px] font-mono text-neutral-500 uppercase">
                   ERR_{errorInfo.category}
                 </span>
@@ -281,7 +281,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
 
             {/* Suggestion */}
             <div className="mb-6 bg-remuse-accent/5 border border-remuse-accent/20 p-4 rounded">
-              <p className="text-xs font-mono text-remuse-accent font-bold mb-1">建议操作</p>
+              <p className="text-xs font-display text-remuse-accent font-bold mb-1">建议操作</p>
               <p className="text-sm text-neutral-300">{errorInfo.suggestion}</p>
             </div>
 
@@ -301,7 +301,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                   setPreviewUrl(null);
                   setLastFile(null);
                 }}
-                className="py-3 border border-neutral-700 text-neutral-400 hover:text-white hover:border-white transition-colors font-mono text-sm"
+                className="py-3 border border-neutral-700 text-neutral-400 hover:text-white hover:border-white transition-colors font-display text-sm"
               >
                 重新拍摄
               </button>
@@ -315,7 +315,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                     setPreviewUrl(null);
                   }
                 }}
-                className="py-3 bg-remuse-accent text-black font-bold hover:bg-white transition-colors font-mono text-sm flex items-center justify-center gap-2"
+                className="py-3 bg-remuse-accent text-black font-bold hover:bg-white transition-colors font-display text-sm flex items-center justify-center gap-2"
               >
                 <RefreshCw size={16} /> 立即重试
               </button>
@@ -348,7 +348,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
               <div className="w-16 h-16 bg-neutral-800 group-hover:bg-remuse-accent group-hover:text-black rounded-full flex items-center justify-center mb-4 transition-all">
                 <Camera size={32} />
               </div>
-              <span className="font-mono text-lg text-neutral-300">拍摄 / 上传</span>
+              <span className="font-display text-lg text-neutral-300">拍摄 / 上传</span>
               <span className="text-xs text-neutral-500 mt-2 font-mono text-center">
                 支持 JPG, PNG <br/> AI 自动开始分析
               </span>
@@ -360,7 +360,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
         {!isAnalyzing && analysisResult && !isGeneratingSticker && (
             <div className="bg-remuse-panel border border-remuse-border p-6 clip-corner shadow-2xl animate-fade-in">
                 <div className="flex items-center justify-between mb-6 border-b border-neutral-800 pb-4">
-                    <h3 className="text-xl font-bold font-mono text-white flex items-center gap-2">
+                    <h3 className="text-xl font-bold font-display text-white flex items-center gap-2">
                         <Check size={20} className="text-remuse-accent" />
                         归档成功
                     </h3>
@@ -396,7 +396,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                 ) : (
                     <button 
                         onClick={handleGenerateSticker}
-                        className="w-full mb-4 bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white py-3 font-mono text-sm flex items-center justify-center gap-2 transition-colors group"
+                        className="w-full mb-4 bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white py-3 font-display text-sm flex items-center justify-center gap-2 transition-colors group"
                     >
                         <StickerIcon size={16} className="text-remuse-secondary group-hover:animate-bounce" />
                         生成数字贴纸 & 短剧
@@ -406,13 +406,13 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                 <div className="grid grid-cols-2 gap-3">
                     <button 
                         onClick={onCancel}
-                        className="py-3 border border-neutral-700 text-neutral-400 hover:text-white hover:border-white transition-colors font-mono text-sm"
+                        className="py-3 border border-neutral-700 text-neutral-400 hover:text-white hover:border-white transition-colors font-display text-sm"
                     >
                         返回首页
                     </button>
                     <button 
                         onClick={onCancel} // In a real app, maybe go to detail
-                        className="py-3 bg-remuse-accent text-black font-bold hover:bg-white transition-colors font-mono text-sm flex items-center justify-center gap-2"
+                        className="py-3 bg-remuse-accent text-black font-bold hover:bg-white transition-colors font-display text-sm flex items-center justify-center gap-2"
                     >
                         查看详情 <ArrowRight size={16} />
                     </button>
@@ -427,7 +427,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
           <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
               <div className="bg-remuse-panel border border-remuse-border w-full max-w-md max-h-[80vh] flex flex-col clip-corner shadow-2xl">
                   <div className="p-4 border-b border-remuse-border flex justify-between items-center bg-neutral-900">
-                      <h3 className="text-white font-mono font-bold flex items-center gap-2">
+                      <h3 className="text-white font-display font-bold flex items-center gap-2">
                           <Box size={16} className="text-remuse-accent"/> TARGET DESTINATION
                       </h3>
                       <button onClick={() => setShowHallSelector(false)} className="text-neutral-500 hover:text-white">

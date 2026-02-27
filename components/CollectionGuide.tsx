@@ -29,7 +29,7 @@ const GuideSection: React.FC<{
                     {icon}
                 </div>
                 <div>
-                    <h3 className="text-xl font-bold font-mono text-white">{title}</h3>
+                    <h3 className="text-xl font-bold font-display text-white">{title}</h3>
                     <p className="text-xs text-neutral-500">{description}</p>
                 </div>
             </div>
@@ -85,16 +85,16 @@ const CollectionGuide: React.FC<CollectionGuideProps> = ({ items, guideData, onU
                  {/* Header */}
                  <div className="flex items-end justify-between mb-12 animate-fade-in">
                      <div>
-                         <h1 className="text-4xl font-bold font-mono tracking-tighter mb-2 flex items-center gap-3">
+                         <h1 className="text-4xl font-bold font-display tracking-tight mb-2 flex items-center gap-3">
                              <BookOpen size={36} className="text-remuse-secondary" />
                              COLLECTION GUIDE
                          </h1>
-                         <p className="text-neutral-500 font-mono text-sm max-w-lg">
+                         <p className="text-neutral-500 text-sm max-w-lg">
                              归档你的特殊发现。完成图鉴以解锁专属徽章。
                          </p>
                      </div>
                      <div className="hidden md:block text-right">
-                         <span className="block text-3xl font-bold text-white">
+                         <span className="block text-3xl font-display font-bold text-white">
                              {guideData.common.length + guideData.rare.length + guideData.seasonal.length}
                          </span>
                          <span className="text-[10px] text-neutral-500 font-mono tracking-widest uppercase">Badges Collected</span>
@@ -141,7 +141,7 @@ const CollectionGuide: React.FC<CollectionGuideProps> = ({ items, guideData, onU
                 <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col animate-fade-in">
                     <div className="p-6 border-b border-white/10 flex items-center justify-between">
                         <div>
-                            <h2 className="text-xl font-bold font-mono text-white">SELECT ITEM FOR ARCHIVE</h2>
+                            <h2 className="text-xl font-bold font-display text-white">SELECT ITEM FOR ARCHIVE</h2>
                             <p className="text-xs text-neutral-500 font-mono mt-1">
                                 TARGET: <span className="text-remuse-secondary uppercase">{activeCategory}</span>
                             </p>
@@ -175,7 +175,7 @@ const CollectionGuide: React.FC<CollectionGuideProps> = ({ items, guideData, onU
                                         >
                                             <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                                             <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black to-transparent">
-                                                <span className="text-xs font-bold text-white truncate block">{item.name}</span>
+                                                <span className="text-xs font-display font-bold text-white truncate block">{item.name}</span>
                                             </div>
                                         </button>
                                     );

@@ -169,7 +169,7 @@ const AchievementBadge: React.FC<{ achievement: Achievement; unlocked: boolean }
                 </div>
                 {unlocked && <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping"></div>}
             </div>
-            <h4 className={`font-bold font-mono text-sm mb-1 ${unlocked ? 'text-white' : 'text-neutral-500'}`}>
+            <h4 className={`font-bold font-display text-sm mb-1 ${unlocked ? 'text-white' : 'text-neutral-500'}`}>
                 {achievement.title}
             </h4>
             <p className="text-[10px] text-neutral-500 text-center max-w-[100px]">{achievement.desc}</p>
@@ -256,8 +256,8 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                <Briefcase size={24} />
              </div>
              <div>
-               <h2 className="text-2xl font-bold font-mono text-white tracking-wider">MY TOOLKIT</h2>
-               <p className="text-xs text-neutral-500 font-mono">自定义你的再生工具库</p>
+               <h2 className="text-2xl font-bold font-display text-white tracking-wide">MY TOOLKIT</h2>
+               <p className="text-xs text-neutral-500 mt-1">自定义你的再生工具库</p>
              </div>
           </div>
           <button 
@@ -310,7 +310,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                             <div className="w-10 h-10 rounded-full bg-neutral-800 group-hover:bg-remuse-accent group-hover:text-black flex items-center justify-center transition-colors mb-2">
                                 <Plus size={20} />
                             </div>
-                            <span className="text-[10px] text-neutral-500 group-hover:text-remuse-accent font-mono">ADD TOOL</span>
+                            <span className="text-[10px] text-neutral-500 group-hover:text-remuse-accent font-display">ADD TOOL</span>
                         </button>
                      )}
 
@@ -342,7 +342,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                   <X size={20} />
                 </button>
                 
-                <h2 className="text-xl font-bold text-white font-mono mb-6 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-white font-display mb-6 flex items-center gap-2">
                     <Wrench size={20} className="text-remuse-accent" /> 获取新装备
                 </h2>
                 
@@ -376,7 +376,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                   <button 
                     type="submit"
                     disabled={!newToolName}
-                    className={`w-full py-3 mt-4 font-bold font-mono flex items-center justify-center gap-2 transition-colors
+                    className={`w-full py-3 mt-4 font-bold font-display flex items-center justify-center gap-2 transition-colors
                       ${!newToolName 
                         ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed' 
                         : 'bg-remuse-accent text-black hover:bg-white'}
@@ -402,10 +402,10 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                   <div className="absolute inset-0 bg-remuse-accent mix-blend-color opacity-20"></div>
               </div>
               <div>
-                  <h1 className="text-2xl font-bold text-white font-mono tracking-tight">
+                  <h1 className="text-2xl font-bold text-white font-display tracking-tight">
                       CURATOR OFFICE <span className="text-remuse-accent">::</span> ADMIN
                   </h1>
-                  <p className="text-neutral-500 font-mono text-xs mt-1">
+                  <p className="text-neutral-500 text-xs mt-1">
                       ID: 89757 // LEVEL {Math.floor(items.length / 5) + 1}
                   </p>
               </div>
@@ -422,7 +422,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                        <Hexagon size={16} className="text-neutral-700" />
                        <Hexagon size={16} className="text-neutral-700" />
                   </div>
-                  <h3 className="text-lg font-mono text-neutral-300 mb-6 flex items-center gap-2">
+                  <h3 className="text-lg font-display text-neutral-300 mb-6 flex items-center gap-2">
                       <Star size={16} className="text-remuse-secondary"/> 馆藏星屑
                   </h3>
                   <JarVisualization count={items.length} />
@@ -437,7 +437,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                        <Hexagon size={16} className="text-neutral-700" />
                        <Hexagon size={16} className="text-neutral-700" />
                   </div>
-                  <h3 className="text-lg font-mono text-neutral-300 mb-6 flex items-center gap-2">
+                  <h3 className="text-lg font-display text-neutral-300 mb-6 flex items-center gap-2">
                       <Sprout size={16} className="text-remuse-accent"/> 再生森林
                   </h3>
                   <GardenVisualization remusedCount={remusedCount} />
@@ -451,7 +451,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
           <section>
              <div className="flex items-center gap-4 mb-6">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent to-neutral-700"></div>
-                <h2 className="text-xl font-mono text-white flex items-center gap-2">
+                <h2 className="text-xl font-display text-white flex items-center gap-2">
                     <Briefcase className="text-remuse-accent" size={20} /> 
                     EQUIPMENT
                 </h2>
@@ -472,7 +472,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
                 <div className="relative z-10 flex flex-col items-center gap-3">
                    <div className="flex items-center gap-4 text-neutral-400 group-hover:text-remuse-accent transition-colors">
                       <Briefcase size={32} strokeWidth={1.5} />
-                      <span className="text-2xl md:text-3xl font-black font-mono tracking-tighter">TOOLKIT</span>
+                      <span className="text-2xl md:text-3xl font-black font-display tracking-tight">TOOLKIT</span>
                    </div>
                    <div className="flex gap-2">
                       {myTools.slice(0, 5).map((tool) => (
@@ -493,7 +493,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
           <section>
               <div className="flex items-center gap-4 mb-8">
                   <div className="h-px flex-1 bg-gradient-to-r from-transparent to-neutral-700"></div>
-                  <h2 className="text-xl font-mono text-white flex items-center gap-2">
+                  <h2 className="text-xl font-display text-white flex items-center gap-2">
                       <Trophy className="text-remuse-secondary" size={20} /> 
                       ACHIEVEMENTS
                   </h2>
@@ -514,15 +514,15 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
           {/* Stats Summary Footer */}
           <div className="grid grid-cols-3 gap-4 border-t border-neutral-800 pt-8">
               <div className="text-center">
-                  <span className="block text-3xl font-bold text-white mb-1">{items.length}</span>
+                  <span className="block text-3xl font-display font-bold text-white mb-1">{items.length}</span>
                   <span className="text-[10px] text-neutral-500 font-mono uppercase">Total Items</span>
               </div>
               <div className="text-center border-l border-neutral-800">
-                  <span className="block text-3xl font-bold text-remuse-accent mb-1">{remusedCount}</span>
+                  <span className="block text-3xl font-display font-bold text-remuse-accent mb-1">{remusedCount}</span>
                   <span className="text-[10px] text-neutral-500 font-mono uppercase">Remused</span>
               </div>
               <div className="text-center border-l border-neutral-800">
-                  <span className="block text-3xl font-bold text-remuse-secondary mb-1">
+                  <span className="block text-3xl font-display font-bold text-remuse-secondary mb-1">
                       {remusedCount * 10 + items.length * 5}
                   </span>
                   <span className="text-[10px] text-neutral-500 font-mono uppercase">Eco Points</span>

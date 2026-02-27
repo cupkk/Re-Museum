@@ -66,7 +66,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       {/* Skip Button */}
       <button 
         onClick={handleComplete}
-        className="absolute top-6 right-6 text-neutral-500 hover:text-white font-mono text-xs z-20 flex items-center gap-1"
+        className="absolute top-6 right-6 text-neutral-500 hover:text-white font-display text-xs z-20 flex items-center gap-1"
       >
         SKIP <X size={14} />
       </button>
@@ -91,7 +91,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         </div>
                         
                         <span className="text-xs font-mono text-neutral-500 tracking-[0.3em] mb-2 block">{slide.sub}</span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-white font-mono mb-4">{slide.title}</h2>
+                        <h2 className="text-3xl md:text-4xl font-bold text-white font-display mb-4">{slide.title}</h2>
                         <p className="text-neutral-400 leading-relaxed text-sm md:text-base">
                             {slide.desc}
                         </p>
@@ -119,7 +119,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             {/* Next/Start Button */}
             <button 
                 onClick={handleNext}
-                className="group flex items-center gap-2 px-6 py-3 bg-white text-black font-bold font-mono text-sm hover:bg-remuse-accent transition-colors clip-corner"
+                className="group flex items-center gap-2 px-6 py-3 bg-white text-black font-bold font-display text-sm hover:bg-remuse-accent transition-colors clip-corner"
             >
                 {currentIndex === slides.length - 1 ? 'START JOURNEY' : 'NEXT'}
                 {currentIndex === slides.length - 1 ? <ArrowRight size={16} /> : <ChevronRight size={16} />}

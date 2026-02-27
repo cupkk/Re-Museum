@@ -27,7 +27,7 @@ const NavItem: React.FC<{
       `}
   >
     <div className="mb-1 md:mb-0 transform transition-transform duration-300 hover:scale-110">{icon}</div>
-    <span className="text-[10px] md:text-sm font-mono tracking-wider">{label}</span>
+    <span className="text-[10px] md:text-sm font-display tracking-wide">{label}</span>
   </button>
 );
 
@@ -69,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
     <div className="flex flex-col h-screen bg-remuse-dark text-white overflow-hidden">
       {/* Top Mobile Bar */}
       <div className="md:hidden p-4 border-b border-remuse-border bg-remuse-panel flex justify-between items-center z-50">
-        <h1 className="font-bold text-xl tracking-tighter">REMUSE</h1>
+        <h1 className="font-display font-bold text-xl tracking-tight">REMUSE</h1>
         <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono text-remuse-secondary">ONLINE</span>
             <div className="w-2 h-2 bg-remuse-secondary rounded-full animate-pulse"></div>
@@ -80,7 +80,7 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
         {/* Sidebar (Desktop) */}
         <nav className="hidden md:flex flex-col w-64 bg-remuse-panel border-r border-remuse-border z-40">
            <div className="p-8 border-b border-remuse-border">
-             <h1 className="text-2xl font-bold tracking-tighter font-mono">REMUSE</h1>
+             <h1 className="text-2xl font-bold tracking-tight font-display">REMUSE</h1>
              <p className="text-[10px] text-neutral-500 font-mono mt-2">V 1.0.0 // ONLINE</p>
            </div>
            

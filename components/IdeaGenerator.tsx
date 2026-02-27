@@ -104,7 +104,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete 
             <div className="inline-block px-2 py-1 bg-remuse-accent text-black font-bold font-mono text-xs mb-2">
               ID: {item.id.split('-')[0].toUpperCase()}
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2 leading-none">{item.name}</h1>
+            <h1 className="text-3xl font-display font-bold text-white mb-2 leading-none">{item.name}</h1>
             <p className="text-neutral-400 italic font-mono text-sm border-l-2 border-remuse-accent pl-3">
               {item.story}
             </p>
@@ -139,7 +139,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete 
         <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
 
         <div className="p-6 lg:p-10 overflow-y-auto flex-1 pb-24">
-          <h2 className="text-2xl font-mono text-white mb-6 flex items-center gap-2">
+          <h2 className="text-2xl font-display text-white mb-6 flex items-center gap-2">
             <Hexagon className="text-remuse-secondary" size={24} /> 
             再生协议 (REGENERATION PROTOCOLS)
           </h2>
@@ -159,7 +159,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete 
                    <DifficultyRating level={idea.difficulty} />
                    {selectedIdea === idea && <div className="w-2 h-2 bg-remuse-secondary rounded-full animate-pulse"></div>}
                 </div>
-                <h4 className={`font-bold text-sm ${selectedIdea === idea ? 'text-white' : 'text-neutral-400'}`}>
+                <h4 className={`font-display font-bold text-sm ${selectedIdea === idea ? 'text-white' : 'text-neutral-400'}`}>
                   {idea.title}
                 </h4>
               </button>
@@ -169,7 +169,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete 
           {selectedIdea && (
             <div className="animate-fade-in space-y-8 max-w-3xl">
               <div>
-                <h3 className="text-xl font-bold text-remuse-secondary mb-2">{selectedIdea.title}</h3>
+                <h3 className="text-xl font-display font-bold text-remuse-secondary mb-2">{selectedIdea.title}</h3>
                 <p className="text-neutral-300 leading-relaxed">{selectedIdea.description}</p>
               </div>
 
@@ -210,7 +210,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete 
                  <button 
                   onClick={handleCompleteClick}
                   disabled={isCompleted}
-                  className={`flex-1 font-bold py-4 px-6 transition-all font-mono flex items-center justify-center gap-2 clip-corner
+                  className={`flex-1 font-bold py-4 px-6 transition-all font-display flex items-center justify-center gap-2 clip-corner
                     ${isCompleted 
                         ? 'bg-neutral-800 text-green-400 border border-green-900 cursor-default' 
                         : 'bg-remuse-secondary text-black hover:bg-cyan-300 active:scale-95'}

@@ -78,7 +78,7 @@ const InspirationPlaza: React.FC = () => {
             <p className="text-black font-bold text-sm md:text-base max-w-md">
                 挑战规则：展示你如何将生活中的一次性塑料转化为永久性艺术品。
             </p>
-            <div className="mt-4 flex items-center gap-2 text-xs font-bold font-mono bg-white text-black px-4 py-2 self-start rounded-full hover:scale-105 transition-transform">
+            <div className="mt-4 flex items-center gap-2 text-xs font-bold font-display bg-white text-black px-4 py-2 self-start rounded-full hover:scale-105 transition-transform">
                 接受挑战 <ArrowRight size={14} />
             </div>
         </div>
