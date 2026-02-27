@@ -72,11 +72,11 @@ const StickerCard: React.FC<{
             )}
 
             {/* Sticker Image */}
-            <div className="relative w-full aspect-square mb-4 flex items-center justify-center bg-black rounded overflow-hidden border border-neutral-800">
+            <div className="relative w-full aspect-square mb-4 flex items-center justify-center bg-neutral-950 rounded overflow-hidden border border-neutral-800" style={{ backgroundImage: 'linear-gradient(45deg, #1a1a1a 25%, transparent 25%), linear-gradient(-45deg, #1a1a1a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1a1a1a 75%), linear-gradient(-45deg, transparent 75%, #1a1a1a 75%)', backgroundSize: '16px 16px', backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px' }}>
                 <img 
                     src={sticker.stickerImageUrl} 
                     alt="Sticker" 
-                    className={`max-w-[80%] max-h-[80%] object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-transform duration-500 mix-blend-screen
+                    className={`max-w-[80%] max-h-[80%] object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-transform duration-500
                         ${!selectable && 'group-hover:scale-110'}
                     `}
                 />
@@ -219,9 +219,8 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
         
         ctx.scale(scaleFactor, scaleFactor);
         
-        // 1. Fill Background (Pure Black)
-        ctx.fillStyle = '#000000'; 
-        ctx.fillRect(0, 0, rect.width, rect.height);
+        // 1. Fill Background - transparent (clearRect)
+        ctx.clearRect(0, 0, rect.width, rect.height);
         
         // 2. Draw Items
         const sortedItems = [...layoutItems].sort((a, b) => a.zIndex - b.zIndex);
@@ -250,8 +249,8 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                  const drawWidth = baseWidth;
                  const drawHeight = (img.height / img.width) * drawWidth;
                  
-                 // Use Screen blending for black background stickers
-                 ctx.globalCompositeOperation = 'screen';
+                 // 贴纸已有真透明背景，直接绘制
+                 ctx.globalCompositeOperation = 'source-over';
                  ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
                  
                  ctx.restore();
@@ -387,7 +386,7 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                                 <img 
                                     src={item.sticker.stickerImageUrl} 
                                     alt="Sticker" 
-                                    className="w-full h-auto pointer-events-none mix-blend-screen" 
+                                    className="w-full h-auto pointer-events-none" 
                                 />
                                 {isCustomMode && (
                                     <div className="absolute inset-0 border border-remuse-accent/50 rounded-lg pointer-events-none"></div>

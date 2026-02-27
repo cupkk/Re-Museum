@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, Loader2, Sparkles, X, Box, Check, Sticker as StickerIcon, ArrowRight } from 'lucide-react';
-import { fileToGenerativePart, analyzeItemImage, generateRemuseIdeas, generateSticker } from '../services/geminiService';
+import { Camera, Upload, Loader2, Sparkles, X, Box, Check, Sticker as StickerIcon, ArrowRight, AlertTriangle, RefreshCw, Wifi, WifiOff, ShieldAlert, ImageOff, Clock } from 'lucide-react';
+import { fileToGenerativePart, analyzeItemImage, generateRemuseIdeas, generateSticker, AnalysisError } from '../services/geminiService';
 import { CollectedItem, ExhibitionHall, Sticker } from '../types';
 
 interface ScannerProps {
@@ -87,6 +87,8 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
   // Analysis Result
   const [analysisResult, setAnalysisResult] = useState<CollectedItem | null>(null);
   const [generatedSticker, setGeneratedSticker] = useState<Sticker | null>(null);
+  const [errorInfo, setErrorInfo] = useState<AnalysisError | null>(null);
+  const [lastFile, setLastFile] = useState<File | null>(null);
 
   const selectedHallName = halls.find(h => h.id === selectedHallId)?.name;
 
@@ -95,6 +97,8 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
       const file = e.target.files[0];
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      setErrorInfo(null);
+      setLastFile(file);
       
       // Auto start analysis, pass url directly to avoid stale state
       await processImage(file, url);
@@ -106,6 +110,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
     setStatusText("正在扫描物质结构...");
     setAnalysisResult(null);
     setGeneratedSticker(null);
+    setErrorInfo(null);
     
     // Use directly passed URL or fallback to state (though state might be stale if called immediately)
     const effectiveImageUrl = directUrl || previewUrl || '';
@@ -136,13 +141,20 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
       onItemAdded(newItem);
       setIsAnalyzing(false);
 
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setStatusText("分析失败，请重试。");
-      setTimeout(() => {
-        setIsAnalyzing(false);
-        setPreviewUrl(null);
-      }, 2000);
+      // 结构化错误：如果是 classifyError 返回的已分类错误，直接使用
+      if (err && err.category && err.title && err.suggestion) {
+        setErrorInfo(err as AnalysisError);
+      } else {
+        setErrorInfo({
+          category: 'UNKNOWN',
+          title: '分析失败',
+          message: err?.message || '未知错误',
+          suggestion: '请重试。如果问题持续出现，尝试更换图片。',
+        });
+      }
+      setIsAnalyzing(false);
     }
   };
 
@@ -175,9 +187,18 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
 
         setGeneratedSticker(newSticker);
         onStickerCreated(newSticker);
-    } catch (e) {
+    } catch (e: any) {
         console.error("Sticker Gen Error", e);
-        alert("贴纸生成失败，请重试");
+        if (e && e.category && e.title && e.suggestion) {
+          setErrorInfo(e as AnalysisError);
+        } else {
+          setErrorInfo({
+            category: 'UNKNOWN',
+            title: '贴纸生成失败',
+            message: e?.message || '未知错误',
+            suggestion: '请重试。如果问题持续，尝试重新拍摄图片。',
+          });
+        }
     } finally {
         setIsGeneratingSticker(false);
     }
@@ -199,7 +220,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
       <div className="max-w-md w-full relative z-10">
         
         {/* Header (Only show if not in result view) */}
-        {!analysisResult && !isAnalyzing && (
+        {!analysisResult && !isAnalyzing && !errorInfo && (
             <div className="text-center mb-10">
                 <h2 className="text-4xl font-mono font-bold tracking-tighter mb-2 text-white">
                     ARCHIVE <span className="text-remuse-accent">ENTITY</span>
@@ -227,8 +248,83 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
           </div>
         )}
 
+        {/* --- STATE ERROR: 差异化错误面板 --- */}
+        {!isAnalyzing && !isGeneratingSticker && errorInfo && (
+          <div className="bg-remuse-panel border border-red-900/60 p-6 clip-corner shadow-2xl animate-fade-in">
+            {/* Error Header */}
+            <div className="flex items-center gap-3 mb-5 border-b border-neutral-800 pb-4">
+              <div className={`p-2 rounded-lg ${
+                errorInfo.category === 'NETWORK' ? 'bg-orange-500/10 text-orange-400' :
+                errorInfo.category === 'IMAGE_QUALITY' ? 'bg-yellow-500/10 text-yellow-400' :
+                errorInfo.category === 'RATE_LIMIT' ? 'bg-blue-500/10 text-blue-400' :
+                errorInfo.category === 'SAFETY' ? 'bg-red-500/10 text-red-400' :
+                'bg-neutral-500/10 text-neutral-400'
+              }`}>
+                {errorInfo.category === 'NETWORK' && <WifiOff size={22} />}
+                {errorInfo.category === 'IMAGE_QUALITY' && <ImageOff size={22} />}
+                {errorInfo.category === 'RATE_LIMIT' && <Clock size={22} />}
+                {errorInfo.category === 'SAFETY' && <ShieldAlert size={22} />}
+                {(errorInfo.category === 'PARSE_ERROR' || errorInfo.category === 'UNKNOWN') && <AlertTriangle size={22} />}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold font-mono text-white">{errorInfo.title}</h3>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase">
+                  ERR_{errorInfo.category}
+                </span>
+              </div>
+            </div>
+
+            {/* Error Detail */}
+            <div className="mb-5 bg-neutral-900 p-4 border-l-2 border-red-500/60 rounded-r">
+              <p className="text-sm text-neutral-300 mb-2">{errorInfo.message}</p>
+            </div>
+
+            {/* Suggestion */}
+            <div className="mb-6 bg-remuse-accent/5 border border-remuse-accent/20 p-4 rounded">
+              <p className="text-xs font-mono text-remuse-accent font-bold mb-1">建议操作</p>
+              <p className="text-sm text-neutral-300">{errorInfo.suggestion}</p>
+            </div>
+
+            {/* Preview thumbnail if available */}
+            {previewUrl && (
+              <div className="mb-5 flex items-center gap-3">
+                <img src={previewUrl} alt="Preview" className="w-16 h-16 object-cover rounded border border-neutral-700" />
+                <span className="text-xs text-neutral-500 font-mono">当前图片</span>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => {
+                  setErrorInfo(null);
+                  setPreviewUrl(null);
+                  setLastFile(null);
+                }}
+                className="py-3 border border-neutral-700 text-neutral-400 hover:text-white hover:border-white transition-colors font-mono text-sm"
+              >
+                重新拍摄
+              </button>
+              <button
+                onClick={async () => {
+                  if (lastFile && previewUrl) {
+                    setErrorInfo(null);
+                    await processImage(lastFile, previewUrl);
+                  } else {
+                    setErrorInfo(null);
+                    setPreviewUrl(null);
+                  }
+                }}
+                className="py-3 bg-remuse-accent text-black font-bold hover:bg-white transition-colors font-mono text-sm flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={16} /> 立即重试
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* --- STATE 2: INITIAL UPLOAD --- */}
-        {!isAnalyzing && !analysisResult && !isGeneratingSticker && (
+        {!isAnalyzing && !analysisResult && !isGeneratingSticker && !errorInfo && (
           <div className="space-y-6">
             <div className="flex justify-center">
                 <ScrambleButton 
