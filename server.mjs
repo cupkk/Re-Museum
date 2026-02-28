@@ -53,8 +53,13 @@ app.use(
 // 静态文件托管（Vite 构建产物）
 // ============================
 app.use(express.static(path.join(__dirname, 'dist'), {
-  maxAge: '7d',           // 静态资源缓存 7 天（文件名含 hash）
+  maxAge: '7d',
   immutable: true,
+  setHeaders: (res, servedPath) => {
+    if (servedPath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  },
 }));
 
 // SPA 回退：所有未匹配的路由返回 index.html

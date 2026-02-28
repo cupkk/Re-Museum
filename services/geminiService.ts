@@ -9,7 +9,22 @@ import logger from './logger';
 //   客户端使用占位符 'PROXIED'，SDK 仍需要一个非空值。
 //   所有请求经由代理端点（开发: Vite proxy / 生产: 自建后端）。
 // ============================================================
-const proxyUrl = (typeof process !== 'undefined' && process.env?.GEMINI_PROXY_URL) || '/api/gemini';
+function resolveProxyUrl(): string {
+  const configured = (typeof process !== 'undefined' && process.env?.GEMINI_PROXY_URL) || '/api/gemini';
+
+  if (/^https?:\/\//i.test(configured)) {
+    return configured;
+  }
+
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    const normalizedPath = configured.startsWith('/') ? configured : `/${configured}`;
+    return `${window.location.origin}${normalizedPath}`;
+  }
+
+  return configured;
+}
+
+const proxyUrl = resolveProxyUrl();
 
 const ai = new GoogleGenAI({
   apiKey: 'PROXIED',
@@ -299,35 +314,79 @@ export const generateRemuseIdeas = async (itemDescription: string, material: str
  * 客户端 Canvas 抠图：将纯黑/近黑背景像素替换为透明。
  * 使用亮度+平滑过渡算法，避免硬边缘。
  */
+/**
+ * 智能抠图：从四角 flood-fill 移除背景色（黑色），
+ * 只删除与角落连通的背景像素，不会误伤物体内部的深色区域。
+ * 最后对边缘做平滑羽化，消除锯齿。
+ */
 export const removeBlackBackground = (
   imageUrl: string,
-  threshold: number = 40,
-  feather: number = 25
+  threshold: number = 60,
+  feather: number = 30
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
+      const w = img.width;
+      const h = img.height;
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext('2d')!;
       ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, w, h);
       const { data } = imageData;
 
-      for (let i = 0; i < data.length; i += 4) {
+      const isBackground = (i: number) => {
         const r = data[i], g = data[i + 1], b = data[i + 2];
-        // 计算到纯黑的欧几里得距离
-        const brightness = Math.sqrt(r * r + g * g + b * b); // 0 ~ 441.67
+        return Math.sqrt(r * r + g * g + b * b) <= threshold + feather;
+      };
 
-        if (brightness <= threshold) {
-          data[i + 3] = 0; // 完全透明
-        } else if (brightness <= threshold + feather) {
-          // 平滑过渡，避免硬边缘锯齿
-          data[i + 3] = Math.round(((brightness - threshold) / feather) * 255);
+      const brightness = (i: number) =>
+        Math.sqrt(data[i] ** 2 + data[i + 1] ** 2 + data[i + 2] ** 2);
+
+      // BFS flood-fill from all four corners
+      const visited = new Uint8Array(w * h);
+      const bgMask  = new Uint8Array(w * h); // 1 = background
+      const queue: number[] = [];
+
+      const tryEnqueue = (x: number, y: number) => {
+        if (x < 0 || x >= w || y < 0 || y >= h) return;
+        const idx = y * w + x;
+        if (visited[idx]) return;
+        visited[idx] = 1;
+        if (isBackground(idx * 4)) {
+          bgMask[idx] = 1;
+          queue.push(idx);
         }
-        // else: 保持原始不透明度
+      };
+
+      // Seed corners (+ margin rows/cols for reliability)
+      for (let x = 0; x < w; x++) { tryEnqueue(x, 0); tryEnqueue(x, h - 1); }
+      for (let y = 0; y < h; y++) { tryEnqueue(0, y); tryEnqueue(w - 1, y); }
+
+      while (queue.length > 0) {
+        const idx = queue.pop()!;
+        const x = idx % w;
+        const y = (idx - x) / w;
+        tryEnqueue(x - 1, y);
+        tryEnqueue(x + 1, y);
+        tryEnqueue(x, y - 1);
+        tryEnqueue(x, y + 1);
+      }
+
+      // Apply mask with feathered edges
+      for (let idx = 0; idx < w * h; idx++) {
+        const i = idx * 4;
+        if (bgMask[idx]) {
+          const b = brightness(i);
+          if (b <= threshold) {
+            data[i + 3] = 0;
+          } else {
+            data[i + 3] = Math.round(((b - threshold) / feather) * 255);
+          }
+        }
       }
 
       ctx.putImageData(imageData, 0, 0);
@@ -352,7 +411,7 @@ export const generateSticker = async (base64Image: string, itemName: string): Pr
       }),
       // 2. Generate Sticker Image (Image Edit Model)
       ai.models.generateContent({
-        model: "gemini-2.5-flash-image",
+        model: "gemini-3.1-flash-image-preview",
         contents: {
           parts: [
             {
@@ -362,10 +421,16 @@ export const generateSticker = async (base64Image: string, itemName: string): Pr
               }
             },
             {
-              text: "Create a flat vector art sticker of this object. The sticker MUST have a thick WHITE DIE-CUT BORDER around the subject. The background MUST be PURE SOLID BLACK (#000000). High contrast, vibrant colors, minimalist design. No text, no shadows."
+              text: "Transform this object into a cute flat vector-art sticker illustration. Requirements: 1) Subject must have a THICK WHITE DIE-CUT OUTLINE BORDER (at least 8px). 2) Background must be PERFECTLY UNIFORM SOLID BLACK (#000000) everywhere — no gradients, no noise, no shadows on the background. 3) Use vivid flat colors, minimal shading. 4) Leave generous black space around the sticker. 5) No text, no labels."
             }
           ]
-        }
+        },
+        config: {
+          responseModalities: ["IMAGE"],
+          imageConfig: {
+            aspectRatio: "1:1",
+          },
+        },
       })
     ]);
 

@@ -229,7 +229,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
     if (!newToolName.trim()) return;
 
     const newTool: Tool = {
-        id: crypto.randomUUID(),
+        id: self.crypto?.randomUUID?.() ?? (`${Date.now()}-${Math.random().toString(36).slice(2,11)}`),
         name: newToolName,
         iconType: determineIconType(newToolName),
         color: newToolColor

@@ -157,7 +157,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
       if (controller.signal.aborted) return;
 
       const newItem: CollectedItem = {
-        id: crypto.randomUUID(),
+        id: self.crypto?.randomUUID?.() ?? (`${Date.now()}-${Math.random().toString(36).slice(2,11)}`),
         name: analysis.name,
         category: selectedHallId || analysis.category, 
         material: analysis.material,
@@ -205,7 +205,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
         const { stickerImageUrl, dramaText } = await generateSticker(base64, analysisResult.name);
         
         const newSticker: Sticker = {
-            id: crypto.randomUUID(),
+            id: self.crypto?.randomUUID?.() ?? (`${Date.now()}-${Math.random().toString(36).slice(2,11)}`),
             originalItemId: analysisResult.id,
             stickerImageUrl: stickerImageUrl,
             dramaText: dramaText,

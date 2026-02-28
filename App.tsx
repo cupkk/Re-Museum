@@ -124,6 +124,16 @@ const App: React.FC = () => {
   const handleChangeView = useCallback((newView: ViewState) => {
     if (newView === currentView) return;
     prevViewRef.current = currentView;
+
+    // 涉及 Scanner 的切换：瞬间切换（Scanner 始终挂载，无需过渡）
+    if (newView === 'SCANNER' || currentView === 'SCANNER') {
+      setCurrentView(newView);
+      setShowContent(true);
+      setIsTransitioning(false);
+      return;
+    }
+
+    // 非 Scanner 之间：带骨架屏过渡动画
     setIsTransitioning(true);
     setShowContent(false);
 
@@ -252,9 +262,8 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {/* Actual content with enter animation */}
-          <div className={`h-full transition-opacity duration-200 ${showContent && !isTransitioning ? 'opacity-100 animate-view-enter' : 'opacity-0'}`}>
-          {currentView === 'SCANNER' && (
+          {/* Scanner 始终挂载，完全独立于过渡动画，防止状态丢失 */}
+          <div className={`h-full ${currentView === 'SCANNER' ? '' : 'hidden'}`}>
             <Scanner 
               halls={halls}
               onItemAdded={handleAddItem} 
@@ -265,7 +274,11 @@ const App: React.FC = () => {
                 handleChangeView('ITEM_DETAIL');
               }}
             />
-          )}
+          </div>
+
+          {/* 非 Scanner 视图：带过渡动画 */}
+          {currentView !== 'SCANNER' && (
+          <div className={`h-full transition-opacity duration-200 ${showContent && !isTransitioning ? 'opacity-100 animate-view-enter' : 'opacity-0'}`}>
 
           {currentView === 'MUSEUM' && (
             <Gallery 
@@ -309,6 +322,7 @@ const App: React.FC = () => {
             <InspirationPlaza />
           )}
           </div>
+          )}
         </Layout>
       )}
 
