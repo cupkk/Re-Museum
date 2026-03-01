@@ -278,6 +278,9 @@ const App: React.FC = () => {
                 setSelectedItem(item);
                 handleChangeView('ITEM_DETAIL');
               }}
+              onCompleteItem={handleCompleteRemuse}
+              onUpdateItem={handleUpdateItem}
+              onDeleteItem={handleDeleteItem}
             />
           )}
 

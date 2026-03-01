@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Upload, Loader2, Sparkles, X, Box, Check, Sticker as StickerIcon, ArrowRight, AlertTriangle, RefreshCw, Wifi, WifiOff, ShieldAlert, ImageOff, Clock } from 'lucide-react';
 import { fileToGenerativePart, analyzeItemImage, generateRemuseIdeas, generateSticker, AnalysisError } from '../services/geminiService';
 import { CollectedItem, ExhibitionHall, Sticker } from '../types';
+import IdeaGenerator from './IdeaGenerator';
 
 type BatchItemStatus = 'pending' | 'analyzing' | 'success' | 'error';
 interface BatchItem {
@@ -12,6 +13,8 @@ interface BatchItem {
   status: BatchItemStatus;
   result?: CollectedItem;
   error?: AnalysisError;
+  isGeneratingSticker?: boolean;
+  generatedSticker?: Sticker;
 }
 
 interface ScannerProps {
@@ -20,6 +23,9 @@ interface ScannerProps {
   onStickerCreated: (sticker: Sticker) => void;
   onCancel: () => void;
   onViewDetail: (item: CollectedItem) => void;
+  onCompleteItem?: (id: string) => void;
+  onUpdateItem?: (item: CollectedItem) => void;
+  onDeleteItem?: (id: string) => void;
 }
 
 const ScrambleButton: React.FC<{ 
@@ -83,11 +89,12 @@ const ScrambleButton: React.FC<{
     );
 };
 
-const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated, onCancel, onViewDetail }) => {
+const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated, onCancel, onViewDetail, onCompleteItem, onUpdateItem, onDeleteItem }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingSticker, setIsGeneratingSticker] = useState(false);
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewDetailItem, setPreviewDetailItem] = useState<CollectedItem | null>(null);
   const [statusText, setStatusText] = useState("准备归档");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -241,6 +248,35 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
         };
       }
       setBatchItems(prev => prev.map(item => item.id === itemId ? { ...item, status: 'error', error: errorInfo } : item));
+    }
+  };
+
+  const handleGenerateBatchSticker = async (itemId: string) => {
+    const item = batchItems.find(i => i.id === itemId);
+    if (!item || !item.result) return;
+
+    setBatchItems(prev => prev.map(i => i.id === itemId ? { ...i, isGeneratingSticker: true } : i));
+
+    try {
+      const base64 = item.result.imageUrl.split(',')[1];
+      const { stickerImageUrl, dramaText } = await generateSticker(base64, item.result.name);
+
+      const newSticker: Sticker = {
+        id: self.crypto?.randomUUID?.() ?? (`${Date.now()}-${Math.random().toString(36).slice(2, 11)}`),
+        originalItemId: item.result.id,
+        stickerImageUrl: stickerImageUrl,
+        dramaText: dramaText,
+        category: item.result.category,
+        dateCreated: new Date().toISOString()
+      };
+
+      setBatchItems(prev => prev.map(i => 
+        i.id === itemId ? { ...i, isGeneratingSticker: false, generatedSticker: newSticker } : i
+      ));
+      onStickerCreated(newSticker);
+    } catch (e: unknown) {
+      console.error("Batch sticker generation failed:", e);
+      setBatchItems(prev => prev.map(i => i.id === itemId ? { ...i, isGeneratingSticker: false } : i));
     }
   };
 
@@ -412,7 +448,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                     )}
                   </div>
                   
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {item.status === 'pending' && <p className="text-neutral-500 text-sm font-mono">等待接入神经元网络...</p>}
                     {item.status === 'analyzing' && <p className="text-remuse-secondary text-sm font-mono animate-pulse">正在处理视觉数据包...</p>}
                     {item.status === 'success' && item.result && (
@@ -421,6 +457,33 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                         <p className="text-neutral-400 font-mono text-xs mt-1">
                           <span className="text-remuse-accent">{item.result.category}</span> · {item.result.material}
                         </p>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {item.generatedSticker ? (
+                            <div className="flex items-center gap-2 bg-remuse-secondary/10 px-2 py-1 rounded border border-remuse-secondary/20 truncate max-w-full">
+                              <img src={item.generatedSticker.stickerImageUrl} alt="Sticker" className="w-5 h-5 object-contain drop-shadow-[0_0_2px_rgba(255,255,255,0.5)] shrink-0" />
+                              <span className="text-remuse-secondary text-xs font-mono truncate">已生成贴纸</span>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleGenerateBatchSticker(item.id)}
+                              disabled={item.isGeneratingSticker}
+                              className="flex items-center gap-1.5 text-xs font-mono bg-neutral-800 hover:bg-neutral-700 text-white px-2 py-1 rounded border border-neutral-700 transition-colors disabled:opacity-50 shrink-0"
+                            >
+                              {item.isGeneratingSticker ? (
+                                <><Loader2 size={12} className="animate-spin shrink-0" /> 生成中...</>
+                              ) : (
+                                <><StickerIcon size={12} className="text-remuse-secondary shrink-0" /> 生成贴纸</>
+                              )}
+                            </button>
+                          )}
+                          
+                          <button
+                            onClick={() => setPreviewDetailItem(item.result!)}
+                            className="flex items-center gap-1.5 text-xs font-mono bg-remuse-accent/10 hover:bg-remuse-accent/20 text-remuse-accent px-2 py-1 rounded border border-remuse-accent/20 transition-colors shrink-0"
+                          >
+                            <Box size={12} className="shrink-0" /> 查看详情
+                          </button>
+                        </div>
                       </>
                     )}
                     {item.status === 'error' && item.error && (
@@ -711,6 +774,18 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                   </div>
               </div>
           </div>
+      )}
+
+      {previewDetailItem && (
+        <div className="fixed inset-0 z-[100] animate-fade-in">
+          <IdeaGenerator 
+            item={previewDetailItem} 
+            onBack={() => setPreviewDetailItem(null)}
+            onComplete={(id) => onCompleteItem?.(id)}
+            onUpdateItem={(item) => onUpdateItem?.(item)}
+            onDeleteItem={(id) => { setPreviewDetailItem(null); onDeleteItem?.(id); }}
+          />
+        </div>
       )}
 
     </div>
