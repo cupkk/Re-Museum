@@ -359,7 +359,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
           <div className="space-y-6">
             <div className="flex justify-center">
                 <ScrambleButton 
-                    text="选择展馆" 
+                  text="选择展馆类型" 
                     onClick={() => setShowHallSelector(true)} 
                     isActive={!!selectedHallId}
                     subText={selectedHallName}
