@@ -125,13 +125,17 @@ const App: React.FC = () => {
 
   // --- View transition with skeleton ---
   const handleChangeView = useCallback((newView: ViewState) => {
-    // 允许重复点击 SCANNER（强制重置）
-    if (newView === currentView && newView !== 'SCANNER') return;
+    // 如果已经在 SCANNER 并且再次点击（比如通过导航栏），此时才强制重置 Scanner 状态
+    if (newView === currentView) {
+      if (newView === 'SCANNER') {
+        setScannerKey(k => k + 1);
+      }
+      return;
+    }
     prevViewRef.current = currentView;
 
-    // 导航到 Scanner 时，递增 key 强制重新挂载，清除旧状态
+    // 不再默认给 SCANNER 递增 key 强制重新挂载（以便保留后台处理进度）
     if (newView === 'SCANNER') {
-      setScannerKey(k => k + 1);
       setCurrentView(newView);
       setShowContent(true);
       setIsTransitioning(false);
@@ -267,13 +271,18 @@ const App: React.FC = () => {
 
           {/* Actual content with enter animation */}
           <div className={`h-full transition-opacity duration-200 ${showContent && !isTransitioning ? 'opacity-100 animate-view-enter' : 'opacity-0'}`}>
-          {currentView === 'SCANNER' && (
+          
+          {/* Always render Scanner to preserve background processing state, hide if not currentView */}
+          <div className={currentView === 'SCANNER' ? 'block h-full w-full relative' : 'hidden h-full'}>
             <Scanner 
               key={scannerKey}
               halls={halls}
               onItemAdded={handleAddItem} 
               onStickerCreated={handleStickerCreated}
-              onCancel={() => handleChangeView('MUSEUM')}
+              onCancel={() => {
+                setScannerKey(k => k + 1); // 点击取消/关闭时重置扫描仪并返回画廊
+                handleChangeView('MUSEUM');
+              }}
               onViewDetail={(item) => {
                 setSelectedItem(item);
                 handleChangeView('ITEM_DETAIL');
@@ -282,7 +291,7 @@ const App: React.FC = () => {
               onUpdateItem={handleUpdateItem}
               onDeleteItem={handleDeleteItem}
             />
-          )}
+          </div>
 
           {currentView === 'MUSEUM' && (
             <Gallery 
