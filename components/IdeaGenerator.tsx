@@ -177,7 +177,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete,
           <img 
             src={item.imageUrl} 
             alt={item.name} 
-            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+            className="w-full h-full object-cover transition-all duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-remuse-panel"></div>
           <div className="absolute bottom-6 left-6 right-6">
