@@ -444,7 +444,6 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                          <div className="flex items-center gap-4">
                             <img src={generatedSticker.stickerImageUrl} alt="Sticker" className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]" />
                             <div className="flex-1">
-                                <p className="text-sm font-bold text-white mb-1">白色描边短剧</p>
                                 <div className="bg-black border border-white p-2 rounded-tl-xl rounded-br-xl">
                                     <p className="text-xs text-white font-mono">"{generatedSticker.dramaText}"</p>
                                 </div>

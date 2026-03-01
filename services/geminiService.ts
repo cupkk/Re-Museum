@@ -405,9 +405,13 @@ export const generateSticker = async (base64Image: string, itemName: string): Pr
       // 1. Generate Drama Text (Text Model - fast)
       ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `You are a scriptwriter for a mini-theater of objects. Write a "Short Drama" (2 lines max) for this object: "${itemName}".
-        The tone should be witty, slightly dramatic, or philosophical. It is an object speaking.
-        Output ONLY the Chinese text. Do not add quotes or labels.`,
+        contents: `你是一位治愈系文案作者。请为这件物品写一段第一人称独白（1-2句话）：「${itemName}」。
+        要求：
+        - 以物品的口吻说话，温暖、俏皮、有一点小哲理
+        - 内容积极正向，适合年轻人，有生活气息
+        - 可以表达对被收藏/被再利用的期待和感恩
+        - 避免悲伤、暴力、死亡、负面情绪的表达
+        - 只输出中文独白文案，不要加引号和标签`,
       }),
       // 2. Generate Sticker Image (Image Edit Model)
       ai.models.generateContent({

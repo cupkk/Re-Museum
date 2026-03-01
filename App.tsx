@@ -110,6 +110,9 @@ const App: React.FC = () => {
   const [showContent, setShowContent] = useState(true);
   const prevViewRef = useRef<ViewState>(currentView);
 
+  // Scanner remount key — increments to force fresh Scanner state
+  const [scannerKey, setScannerKey] = useState(0);
+
   // Milestone celebration state
   const [milestoneInfo, setMilestoneInfo] = useState<{ count: number; name: string } | null>(null);
   
@@ -122,26 +125,26 @@ const App: React.FC = () => {
 
   // --- View transition with skeleton ---
   const handleChangeView = useCallback((newView: ViewState) => {
-    if (newView === currentView) return;
+    // 允许重复点击 SCANNER（强制重置）
+    if (newView === currentView && newView !== 'SCANNER') return;
     prevViewRef.current = currentView;
 
-    // 涉及 Scanner 的切换：瞬间切换（Scanner 始终挂载，无需过渡）
-    if (newView === 'SCANNER' || currentView === 'SCANNER') {
+    // 导航到 Scanner 时，递增 key 强制重新挂载，清除旧状态
+    if (newView === 'SCANNER') {
+      setScannerKey(k => k + 1);
       setCurrentView(newView);
       setShowContent(true);
       setIsTransitioning(false);
       return;
     }
 
-    // 非 Scanner 之间：带骨架屏过渡动画
+    // 带骨架屏过渡动画
     setIsTransitioning(true);
     setShowContent(false);
 
-    // Show skeleton briefly, then reveal actual content
     setTimeout(() => {
       setCurrentView(newView);
       setIsTransitioning(false);
-      // Small delay for enter animation
       requestAnimationFrame(() => setShowContent(true));
     }, 280);
   }, [currentView]);
@@ -262,9 +265,11 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {/* Scanner 始终挂载，完全独立于过渡动画，防止状态丢失 */}
-          <div className={`h-full ${currentView === 'SCANNER' ? '' : 'hidden'}`}>
+          {/* Actual content with enter animation */}
+          <div className={`h-full transition-opacity duration-200 ${showContent && !isTransitioning ? 'opacity-100 animate-view-enter' : 'opacity-0'}`}>
+          {currentView === 'SCANNER' && (
             <Scanner 
+              key={scannerKey}
               halls={halls}
               onItemAdded={handleAddItem} 
               onStickerCreated={handleStickerCreated}
@@ -274,11 +279,7 @@ const App: React.FC = () => {
                 handleChangeView('ITEM_DETAIL');
               }}
             />
-          </div>
-
-          {/* 非 Scanner 视图：带过渡动画 */}
-          {currentView !== 'SCANNER' && (
-          <div className={`h-full transition-opacity duration-200 ${showContent && !isTransitioning ? 'opacity-100 animate-view-enter' : 'opacity-0'}`}>
+          )}
 
           {currentView === 'MUSEUM' && (
             <Gallery 
@@ -322,7 +323,6 @@ const App: React.FC = () => {
             <InspirationPlaza />
           )}
           </div>
-          )}
         </Layout>
       )}
 
