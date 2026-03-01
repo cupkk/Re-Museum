@@ -4,6 +4,16 @@ import { Camera, Upload, Loader2, Sparkles, X, Box, Check, Sticker as StickerIco
 import { fileToGenerativePart, analyzeItemImage, generateRemuseIdeas, generateSticker, AnalysisError } from '../services/geminiService';
 import { CollectedItem, ExhibitionHall, Sticker } from '../types';
 
+type BatchItemStatus = 'pending' | 'analyzing' | 'success' | 'error';
+interface BatchItem {
+  id: string; // generated
+  file: File;
+  previewUrl: string;
+  status: BatchItemStatus;
+  result?: CollectedItem;
+  error?: AnalysisError;
+}
+
 interface ScannerProps {
   halls: ExhibitionHall[];
   onItemAdded: (item: CollectedItem) => void;
@@ -86,6 +96,10 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
   const [selectedHallId, setSelectedHallId] = useState<string | null>(null);
   const [showHallSelector, setShowHallSelector] = useState(false);
   
+  // Batch Mode State
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
+  
   // Analysis Result
   const [analysisResult, setAnalysisResult] = useState<CollectedItem | null>(null);
   const [generatedSticker, setGeneratedSticker] = useState<Sticker | null>(null);
@@ -94,36 +108,139 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
 
   const selectedHallName = halls.find(h => h.id === selectedHallId)?.name;
 
-  // Cleanup Blob URLs on unmount or when preview changes
+  // Track blob URLs for cleanup on unmount to avoid revoking on state updates
+  const blobUrlsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      blobUrlsRef.current.add(previewUrl);
+    }
+    batchItems.forEach(item => {
+      if (item.previewUrl && item.previewUrl.startsWith('blob:')) {
+        blobUrlsRef.current.add(item.previewUrl);
+      }
+    });
+  }, [previewUrl, batchItems]);
+
+  // Cleanup Blob URLs only on unmount
   useEffect(() => {
     return () => {
-      if (previewUrl && previewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      blobUrlsRef.current.forEach(url => {
+        URL.revokeObjectURL(url);
+      });
     };
-  }, [previewUrl]);
+  }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length === 0) return;
+
+    // Abort any in-flight analysis
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+
+    setErrorInfo(null);
+    setGeneratedSticker(null);
+
+    // Single file flow (camera / album single)
+    if (files.length === 1) {
+      setIsBatchMode(false);
+      const file = files[0];
+
       // Revoke previous Blob URL
       if (previewUrl && previewUrl.startsWith('blob:')) {
         URL.revokeObjectURL(previewUrl);
       }
-      
-      // Abort any in-flight analysis
-      if (abortRef.current) {
-        abortRef.current.abort();
-      }
-      
+
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      setErrorInfo(null);
       setLastFile(file);
-      
+
       // Auto start analysis, pass url directly to avoid stale state
       await processImage(file, url);
+      e.target.value = '';
+      return;
+    }
+
+    // Batch flow (album multi-select)
+    setIsBatchMode(true);
+    setStatusText(`检测到 ${files.length} 张图片，开始批量分析...`);
+    
+    // Revoke old batch URLs
+    batchItems.forEach(item => {
+      if (item.previewUrl && item.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+    });
+
+    const newBatchItems: BatchItem[] = files.map(file => ({
+      id: self.crypto?.randomUUID?.() ?? (`${Date.now()}-${Math.random().toString(36).slice(2, 11)}`),
+      file,
+      previewUrl: URL.createObjectURL(file),
+      status: 'pending'
+    }));
+
+    setBatchItems(newBatchItems);
+    e.target.value = '';
+
+    // Create a new abort controller for the batch process if none exists or it is aborted
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    for (const item of newBatchItems) {
+      if (controller.signal.aborted) break;
+      await processBatchItem(item.id, item.file, item.previewUrl);
+    }
+  };
+
+  const processBatchItem = async (itemId: string, file: File, directUrl: string) => {
+    if (abortRef.current?.signal.aborted) return;
+    
+    setBatchItems(prev => prev.map(item => item.id === itemId ? { ...item, status: 'analyzing' } : item));
+    
+    try {
+      const base64 = await fileToGenerativePart(file);
+      if (abortRef.current?.signal.aborted) return;
+      
+      const analysis = await analyzeItemImage(base64);
+      if (abortRef.current?.signal.aborted) return;
+
+      const ideas = await generateRemuseIdeas(analysis.name, analysis.material);
+      if (abortRef.current?.signal.aborted) return;
+
+      const newItem: CollectedItem = {
+        id: self.crypto?.randomUUID?.() ?? (`${Date.now()}-${Math.random().toString(36).slice(2,11)}`),
+        name: analysis.name,
+        category: selectedHallId || analysis.category, 
+        material: analysis.material,
+        story: analysis.story,
+        tags: analysis.tags,
+        imageUrl: `data:${file.type || 'image/jpeg'};base64,${base64}`,
+        dateCollected: new Date().toISOString(),
+        status: 'raw',
+        ideas: ideas
+      };
+
+      setBatchItems(prev => prev.map(item => item.id === itemId ? { ...item, status: 'success', result: newItem } : item));
+      onItemAdded(newItem);
+      
+    } catch (err: unknown) {
+      if (abortRef.current?.signal.aborted) return;
+      const error = err as Record<string, unknown>;
+      let errorInfo: AnalysisError;
+      
+      if (error && error.category && error.title && error.suggestion) {
+        errorInfo = error as unknown as AnalysisError;
+      } else {
+        errorInfo = {
+          category: 'UNKNOWN',
+          title: '分析失败',
+          message: (error?.message as string) || '未知错误',
+          suggestion: '请重试。如果问题持续出现，尝试更换图片。',
+        };
+      }
+      setBatchItems(prev => prev.map(item => item.id === itemId ? { ...item, status: 'error', error: errorInfo } : item));
     }
   };
 
@@ -251,7 +368,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
       <div className="max-w-md w-full relative z-10">
         
         {/* Header (Only show if not in result view) */}
-        {!analysisResult && !isAnalyzing && !errorInfo && (
+        {!isBatchMode && !analysisResult && !isAnalyzing && !errorInfo && (
             <div className="text-center mb-10">
                 <h2 className="text-4xl font-display font-bold tracking-tight mb-2 text-white">
                     ARCHIVE <span className="text-remuse-accent">ENTITY</span>
@@ -262,8 +379,84 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
             </div>
         )}
 
+        {/* --- STATE BATCH: BATCH MODE --- */}
+        {isBatchMode && (
+          <div className="bg-remuse-panel border border-remuse-border p-4 md:p-6 clip-corner shadow-2xl animate-fade-in w-full max-w-xl mx-auto">
+            <div className="flex items-center justify-between mb-4 border-b border-neutral-800 pb-4">
+              <h3 className="text-xl font-bold font-display text-white flex items-center gap-2">
+                <Box size={20} className="text-remuse-accent" />
+                批量归档 {batchItems.filter(i => i.status === 'success').length}/{batchItems.length}
+              </h3>
+            </div>
+            
+            <div className="max-h-[50vh] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+              {batchItems.map((item) => (
+                <div key={item.id} className="bg-neutral-900 border border-neutral-800 p-3 flex gap-4 items-center rounded-lg">
+                  <div className="relative w-16 h-16 shrink-0">
+                    <img src={item.previewUrl} alt="Preview" className="w-full h-full object-cover rounded opacity-80" />
+                    {item.status === 'analyzing' && (
+                      <div className="absolute inset-0 bg-black/60 flex flex-col justify-center items-center rounded">
+                        <Loader2 size={16} className="text-remuse-accent animate-spin mb-1" />
+                        <span className="text-[10px] font-mono text-remuse-accent">读取中</span>
+                      </div>
+                    )}
+                    {item.status === 'success' && (
+                      <div className="absolute -top-2 -right-2 bg-remuse-secondary text-black rounded-full p-1 border-2 border-neutral-900">
+                        <Check size={12} strokeWidth={3} />
+                      </div>
+                    )}
+                    {item.status === 'error' && (
+                      <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 border-2 border-neutral-900">
+                        <AlertTriangle size={12} strokeWidth={3} />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    {item.status === 'pending' && <p className="text-neutral-500 text-sm font-mono">等待接入神经元网络...</p>}
+                    {item.status === 'analyzing' && <p className="text-remuse-secondary text-sm font-mono animate-pulse">正在处理视觉数据包...</p>}
+                    {item.status === 'success' && item.result && (
+                      <>
+                        <p className="text-white font-bold truncate">{item.result.name}</p>
+                        <p className="text-neutral-400 font-mono text-xs mt-1">
+                          <span className="text-remuse-accent">{item.result.category}</span> · {item.result.material}
+                        </p>
+                      </>
+                    )}
+                    {item.status === 'error' && item.error && (
+                      <>
+                        <p className="text-red-400 font-bold text-sm">未能处理</p>
+                        <p className="text-red-900 font-mono text-xs mt-1 truncate">{item.error.title}: {item.error.message}</p>
+                      </>
+                    )}
+                  </div>
+
+                  {item.status === 'error' && (
+                    <button 
+                      onClick={() => processBatchItem(item.id, item.file, item.previewUrl)}
+                      className="shrink-0 p-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded transition-colors"
+                      title="重试"
+                    >
+                      <RefreshCw size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button 
+                onClick={onCancel}
+                className="flex-1 py-3 border border-neutral-700 text-neutral-400 hover:text-white hover:border-white transition-colors font-display text-sm"
+              >
+                结束批量归档
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* --- STATE 1: ANALYZING / GENERATING STICKER --- */}
-        {(isAnalyzing || isGeneratingSticker) && (
+        {!isBatchMode && (isAnalyzing || isGeneratingSticker) && (
           <div className="bg-remuse-panel border border-remuse-border p-8 rounded-none clip-corner flex flex-col items-center animate-fade-in">
             <div className="relative w-32 h-32 mb-6">
                <div className="absolute inset-0 border-2 border-remuse-accent rounded-full animate-ping opacity-20"></div>
@@ -280,7 +473,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
         )}
 
         {/* --- STATE ERROR: 差异化错误面板 --- */}
-        {!isAnalyzing && !isGeneratingSticker && errorInfo && (
+        {!isBatchMode && !isAnalyzing && !isGeneratingSticker && errorInfo && (
           <div className="bg-remuse-panel border border-red-900/60 p-6 clip-corner shadow-2xl animate-fade-in">
             {/* Error Header */}
             <div className="flex items-center gap-3 mb-5 border-b border-neutral-800 pb-4">
@@ -355,7 +548,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
         )}
 
         {/* --- STATE 2: INITIAL UPLOAD --- */}
-        {!isAnalyzing && !analysisResult && !isGeneratingSticker && !errorInfo && (
+        {!isBatchMode && !isAnalyzing && !analysisResult && !isGeneratingSticker && !errorInfo && (
           <div className="space-y-6">
             <div className="flex justify-center">
                 <ScrambleButton 
@@ -372,6 +565,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
               <input 
                 type="file" 
                 accept="image/*" 
+                multiple
                 className="hidden" 
                 ref={fileInputRef}
                 onChange={handleFileChange}
@@ -390,7 +584,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
               </div>
               <span className="font-display text-lg text-neutral-300 mb-1">归档你的物品</span>
               <span className="text-xs text-neutral-400 font-mono text-center mb-6">
-                支持 JPG, PNG · AI 自动分析
+                支持 JPG, PNG · 相册可多选批量分析
               </span>
 
               {/* Two action buttons */}
@@ -404,7 +598,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                 </button>
                 <button
                   onClick={triggerInput}
-                  aria-label="从相册选择图片"
+                  aria-label="从相册选择图片（支持多选）"
                   className="flex-1 flex items-center justify-center gap-2 py-3 border border-neutral-600 text-neutral-300 font-display text-sm hover:border-white hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-remuse-secondary"
                 >
                   <Upload size={18} /> 相册
@@ -415,7 +609,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
         )}
 
         {/* --- STATE 3: RESULT & ACTIONS --- */}
-        {!isAnalyzing && analysisResult && !isGeneratingSticker && (
+        {!isBatchMode && !isAnalyzing && analysisResult && !isGeneratingSticker && (
             <div className="bg-remuse-panel border border-remuse-border p-4 md:p-6 clip-corner shadow-2xl animate-fade-in max-h-[calc(100vh-8rem)] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4 md:mb-6 border-b border-neutral-800 pb-4">
                     <h3 className="text-xl font-bold font-display text-white flex items-center gap-2">
