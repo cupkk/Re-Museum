@@ -38,7 +38,7 @@ const GuideSection: React.FC<{
                 {/* Render Filled Items */}
                 {filledItems.map(item => (
                     <div key={item.id} className="group relative flex flex-col items-center gap-3">
-                         <div className={`w-24 h-24 rounded-full p-1 border-2 border-dashed ${colorClass} hover:border-solid hover:scale-110 transition-all duration-300 relative overflow-hidden bg-black`}>
+                         <div className={`w-16 h-16 md:w-24 md:h-24 rounded-full p-1 border-2 border-dashed ${colorClass} hover:border-solid hover:scale-110 transition-all duration-300 relative overflow-hidden bg-black`}>
                              <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover rounded-full" />
                              {/* Gloss effect */}
                              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent to-white/20 pointer-events-none"></div>
@@ -50,9 +50,9 @@ const GuideSection: React.FC<{
                 ))}
 
                 {/* Render 'Add' Slot */}
-                <button 
+                    <button 
                     onClick={onAdd}
-                    className={`w-24 h-24 rounded-full border-2 border-dashed border-neutral-700 hover:border-white hover:bg-neutral-800 transition-all flex flex-col items-center justify-center gap-2 group`}
+                    className={`w-16 h-16 md:w-24 md:h-24 rounded-full border-2 border-dashed border-neutral-700 hover:border-white hover:bg-neutral-800 transition-all flex flex-col items-center justify-center gap-2 group`}
                 >
                     <Plus size={24} className="text-neutral-500 group-hover:text-white" />
                     <span className="text-[10px] text-neutral-500 font-mono group-hover:text-white">ADD</span>
@@ -81,11 +81,11 @@ const CollectionGuide: React.FC<CollectionGuideProps> = ({ items, guideData, onU
 
     return (
         <div className="h-full bg-remuse-dark text-white relative">
-            <div className="p-8 h-full overflow-y-auto pb-32">
+            <div className="p-4 md:p-8 h-full overflow-y-auto pb-32">
                  {/* Header */}
                  <div className="flex items-end justify-between mb-12 animate-fade-in">
                      <div>
-                         <h1 className="text-4xl font-bold font-display tracking-tight mb-2 flex items-center gap-3">
+                         <h1 className="text-2xl md:text-4xl font-bold font-display tracking-tight mb-2 flex items-center gap-3">
                              <BookOpen size={36} className="text-remuse-secondary" />
                              COLLECTION GUIDE
                          </h1>
@@ -138,7 +138,7 @@ const CollectionGuide: React.FC<CollectionGuideProps> = ({ items, guideData, onU
 
             {/* Selection Modal */}
             {activeCategory && (
-                <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col animate-fade-in">
+                <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col animate-fade-in">
                     <div className="p-6 border-b border-white/10 flex items-center justify-between">
                         <div>
                             <h2 className="text-xl font-bold font-display text-white">SELECT ITEM FOR ARCHIVE</h2>

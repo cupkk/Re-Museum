@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Remuse | 再生博物馆</title>
     <meta name="description" content="REMUSE 万物再博物馆 — 用 AI 将日常物品数字化归档，发现万物再生的可能性。">
     <meta name="theme-color" content="#0f0f0f">
@@ -119,6 +119,20 @@
       /* Thin border workaround for clip-path using drop-shadow */
       .house-border {
         filter: drop-shadow(0px 0px 1px rgba(255, 255, 255, 0.5));
+      }
+      /* Safe area insets for notch / home-indicator devices */
+      .safe-area-pt { padding-top: env(safe-area-inset-top); }
+      .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
+      /* Hide scrollbar utility */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      /* Reduced motion preference */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
       }
     </style>
   <script type="importmap">

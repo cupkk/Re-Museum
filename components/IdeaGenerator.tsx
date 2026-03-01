@@ -79,7 +79,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete,
   const allCategories = Object.values(ItemCategory) as string[];
 
   return (
-    <div className="h-full flex flex-col lg:flex-row overflow-hidden bg-remuse-dark relative">
+    <div className="h-full flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden bg-remuse-dark relative">
       
       {/* Celebration Overlay Effect */}
       {showCelebration && (
@@ -148,7 +148,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete,
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
-          <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-30 bg-black/80 flex items-center justify-center p-6">
             <div className="bg-remuse-panel border border-red-900/60 p-6 max-w-xs w-full clip-corner animate-fade-in">
               <h3 className="text-lg font-display font-bold text-white mb-2">确认删除</h3>
               <p className="text-sm text-neutral-400 mb-1">
@@ -173,7 +173,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete,
           </div>
         )}
         
-        <div className="h-1/2 lg:h-2/3 relative">
+        <div className="h-[40vh] lg:h-2/3 shrink-0 relative">
           <img 
             src={item.imageUrl} 
             alt={item.name} 
@@ -273,7 +273,7 @@ const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ item, onBack, onComplete,
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
 
-        <div className="p-6 lg:p-10 overflow-y-auto flex-1 pb-24">
+        <div className="p-4 lg:p-10 overflow-y-auto flex-1 pb-32">
           <h2 className="text-2xl font-display text-white mb-6 flex items-center gap-2">
             <Hexagon className="text-remuse-secondary" size={24} /> 
             再生协议 (REGENERATION PROTOCOLS)

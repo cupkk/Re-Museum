@@ -75,7 +75,7 @@ const StickerCard: React.FC<{
 
             {/* Action Bar (Only show if not in selection mode) */}
             {!selectable && (
-                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                <div className="absolute top-2 right-2 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
                     <button 
                         onClick={(e) => {
                             e.stopPropagation();
@@ -661,7 +661,8 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                                 className="shadow-2xl rounded-lg overflow-hidden transition-all duration-300"
                                 style={{ 
                                     backgroundColor: t.bgColor,
-                                    width: t.ratio === '1:1' ? '360px' : t.ratio === '4:3' ? '420px' : '340px',
+                                    width: '100%',
+                                    maxWidth: t.ratio === '1:1' ? '360px' : t.ratio === '4:3' ? '420px' : '340px',
                                     aspectRatio: `${t.width}/${t.height}`,
                                     maxHeight: '70vh'
                                 }}
@@ -793,7 +794,8 @@ const StickerLibrary: React.FC<StickerLibraryProps> = ({ stickers, onDeleteStick
                                 ref={printCanvasRef}
                                 className="bg-white shadow-2xl rounded-sm overflow-hidden"
                                 style={{ 
-                                    width: '340px',
+                                    width: '100%',
+                                    maxWidth: '340px',
                                     aspectRatio: '2480/3508',
                                     maxHeight: '75vh',
                                     transform: `scale(${printScale})`,

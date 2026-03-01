@@ -39,7 +39,12 @@ const LaunchScreen: React.FC<LaunchScreenProps> = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className={`fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-700 ease-out ${stage === 'fade' ? 'opacity-0' : 'opacity-100'}`}>
+    <div 
+      onClick={onComplete}
+      role="button"
+      aria-label="点击跳过启动动画"
+      className={`fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-700 ease-out cursor-pointer ${stage === 'fade' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+    >
       <div className="relative w-80 h-80">
         <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
           <defs>
@@ -132,7 +137,7 @@ const LaunchScreen: React.FC<LaunchScreenProps> = ({ onComplete }) => {
         {/* Loading Text */}
         <div className="absolute -bottom-12 w-full text-center">
             <span className="font-mono text-xs text-neutral-400 tracking-[0.2em] uppercase animate-pulse">
-                System Initializing...
+                点击任意处跳过
             </span>
         </div>
       </div>

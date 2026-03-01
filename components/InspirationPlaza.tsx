@@ -105,11 +105,11 @@ const InspirationPlaza: React.FC = () => {
       </div>
 
       {/* 3. Waterfall Content Flow */}
-      <div className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="px-4 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
          {MOCK_POSTS.map((post) => (
              <div key={post.id} className="bg-white group overflow-hidden hover:shadow-[0_0_15px_rgba(204,255,0,0.3)] transition-shadow duration-300 relative">
                  {/* Image */}
-                 <div className="relative aspect-[4/5] overflow-hidden">
+                 <div className="relative aspect-[3/4] overflow-hidden">
                      <img 
                         src={post.image} 
                         alt={post.title} 
@@ -121,15 +121,15 @@ const InspirationPlaza: React.FC = () => {
                  </div>
 
                  {/* Content Body */}
-                 <div className="p-4">
-                     <h3 className="text-black font-bold text-lg mb-3 leading-tight group-hover:text-remuse-border transition-colors">
+                 <div className="p-3 md:p-4">
+                     <h3 className="text-black font-bold text-sm md:text-lg mb-2 md:mb-3 leading-tight group-hover:text-remuse-border transition-colors line-clamp-2">
                         {post.title}
                      </h3>
                      
                      <div className="flex items-center justify-between">
                          <div className="flex items-center gap-2">
                              <img src={post.avatar} alt={post.author} className="w-6 h-6 rounded-full border border-neutral-200" />
-                             <span className="text-xs text-neutral-500 font-mono truncate max-w-[80px]">{post.author}</span>
+                             <span className="text-xs text-neutral-500 font-mono truncate max-w-[100px]">{post.author}</span>
                          </div>
                          
                          {/* Action Buttons - Energy Color */}

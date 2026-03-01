@@ -248,7 +248,7 @@ const CuratorOffice: React.FC<CuratorOfficeProps> = ({ items }) => {
   // If toolkit is open, render the sub-page overlay
   if (isToolkitOpen) {
     return (
-      <div className="absolute inset-0 z-50 bg-neutral-900 flex flex-col animate-fade-in">
+      <div className="fixed inset-0 z-50 bg-neutral-900 flex flex-col animate-fade-in safe-area-pt">
         {/* Header */}
         <div className="p-6 border-b border-remuse-border bg-remuse-panel flex items-center justify-between">
           <div className="flex items-center gap-4">

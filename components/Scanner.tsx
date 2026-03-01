@@ -237,7 +237,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
   const triggerCamera = () => cameraInputRef.current?.click();
 
   return (
-    <div className="h-full flex flex-col items-center justify-center p-6 relative bg-remuse-dark">
+    <div className="h-full flex flex-col items-center justify-start pt-12 md:justify-center p-4 md:p-6 relative bg-remuse-dark overflow-y-auto">
       <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
 
       <button 
@@ -366,7 +366,7 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
                 />
             </div>
             <div 
-              className="group border-2 border-dashed border-neutral-700 bg-remuse-panel/50 p-8 flex flex-col items-center justify-center min-h-[300px] clip-corner"
+              className="group border-2 border-dashed border-neutral-700 bg-remuse-panel/50 p-6 md:p-8 flex flex-col items-center justify-center min-h-[240px] md:min-h-[300px] clip-corner"
             >
               {/* Hidden file inputs */}
               <input 
@@ -416,8 +416,8 @@ const Scanner: React.FC<ScannerProps> = ({ halls, onItemAdded, onStickerCreated,
 
         {/* --- STATE 3: RESULT & ACTIONS --- */}
         {!isAnalyzing && analysisResult && !isGeneratingSticker && (
-            <div className="bg-remuse-panel border border-remuse-border p-6 clip-corner shadow-2xl animate-fade-in">
-                <div className="flex items-center justify-between mb-6 border-b border-neutral-800 pb-4">
+            <div className="bg-remuse-panel border border-remuse-border p-4 md:p-6 clip-corner shadow-2xl animate-fade-in max-h-[calc(100vh-8rem)] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4 md:mb-6 border-b border-neutral-800 pb-4">
                     <h3 className="text-xl font-bold font-display text-white flex items-center gap-2">
                         <Check size={20} className="text-remuse-accent" />
                         归档成功

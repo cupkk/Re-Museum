@@ -23,7 +23,7 @@ const NavItem: React.FC<{
     aria-selected={active}
     aria-current={active ? 'page' : undefined}
     aria-label={label}
-    className={`flex flex-col items-center justify-center p-2 w-full md:w-auto md:flex-row md:justify-start md:px-6 md:py-4 md:gap-4 transition-all duration-300
+    className={`flex flex-col items-center justify-center p-2 min-h-[48px] w-full md:w-auto md:flex-row md:justify-start md:px-6 md:py-4 md:gap-4 transition-all duration-300
       ${active 
         ? 'text-remuse-accent bg-neutral-900 border-t-2 md:border-t-0 md:border-l-2 border-remuse-accent' 
         : 'text-neutral-400 hover:text-neutral-200'}
@@ -72,7 +72,7 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
   return (
     <div className="flex flex-col h-screen bg-remuse-dark text-white overflow-hidden">
       {/* Top Mobile Bar */}
-      <div className="md:hidden p-4 border-b border-remuse-border bg-remuse-panel flex justify-between items-center z-50">
+      <div className="md:hidden p-4 safe-area-pt border-b border-remuse-border bg-remuse-panel flex justify-between items-center z-50">
         <h1 className="font-display font-bold text-xl tracking-tight">REMUSE</h1>
         <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono text-remuse-secondary">ONLINE</span>
@@ -173,8 +173,8 @@ const Layout: React.FC<LayoutProps> = ({ currentView, onChangeView, children, ec
             aria-current={currentView === 'MUSEUM' ? 'page' : undefined}
             className="group relative w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-transform hover:scale-105 active:scale-95"
           >
-            {/* Pulsing rings */}
-            <span className="absolute inset-0 rounded-full bg-remuse-secondary opacity-75 animate-ping duration-[3s]"></span>
+            {/* Subtle glow ring (no persistent animation for GPU perf) */}
+            <span className="absolute inset-0 rounded-full bg-remuse-secondary opacity-30 scale-110"></span>
             <span className="absolute inset-0 rounded-full bg-remuse-secondary opacity-100"></span>
             
             {/* Icon */}

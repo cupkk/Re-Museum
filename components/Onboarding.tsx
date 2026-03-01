@@ -44,12 +44,33 @@ const slides = [
 const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
+  const touchStartX = React.useRef(0);
+  const touchEndX = React.useRef(0);
 
   const handleNext = () => {
     if (currentIndex < slides.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
       handleComplete();
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) handleNext();
+      else handlePrev();
     }
   };
 
@@ -66,13 +87,16 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       {/* Skip Button */}
       <button 
         onClick={handleComplete}
-        className="absolute top-6 right-6 text-neutral-500 hover:text-white font-display text-xs z-20 flex items-center gap-1"
+        className="absolute top-6 right-6 text-neutral-500 hover:text-white font-display text-xs z-20 flex items-center gap-1 p-2 min-h-[44px] min-w-[44px]"
       >
         SKIP <X size={14} />
       </button>
 
       {/* Main Slider Area */}
-      <div className="flex-1 relative overflow-hidden flex items-center justify-center">
+      <div className="flex-1 relative overflow-hidden flex items-center justify-center"
+           onTouchStart={handleTouchStart}
+           onTouchEnd={handleTouchEnd}
+      >
          <div 
             className="flex transition-transform duration-500 ease-out w-full h-full"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
